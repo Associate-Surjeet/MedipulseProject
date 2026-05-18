@@ -1,0 +1,71 @@
+using Microsoft.AspNetCore.Mvc;
+using ProcurementService.DTOs;
+using ProcurementService.Services;
+using Shared.Constants;
+using Shared.Filters;
+
+namespace ProcurementService.Controllers;
+
+[ApiController]
+[Route("api/receipts")]
+[RoleAuthorize(Roles.Admin, Roles.ProcurementOfficer, Roles.SupplyManager,
+               Roles.PharmacyManager, Roles.ComplianceOfficer)]
+public class ReceiptsController : ControllerBase
+{
+    private readonly IProcurementService _service;
+
+    public ReceiptsController(IProcurementService service) => _service = service;
+
+    // GET /api/receipts
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+        => Ok(await _service.GetAllReceiptsAsync());
+
+    // GET /api/receipts/{id}
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var receipt = await _service.GetReceiptByIdAsync(id);
+        if (receipt == null) return NotFound(new { message = $"Receipt {id} not found." });
+        return Ok(receipt);
+    }
+
+    // POST /api/receipts
+    // PO must be Approved, Shipped, or PartiallyReceived.
+    // Auto-advances PO to PartiallyReceived on first GRN.
+    [HttpPost]
+    [RoleAuthorize(Roles.Admin, Roles.ProcurementOfficer, Roles.SupplyManager)]
+    public async Task<IActionResult> Create([FromBody] CreateReceiptRequest request)
+    {
+        try
+        {
+            var created = await _service.CreateReceiptAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = created.ReceiptId }, created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return UnprocessableEntity(new { message = ex.Message });
+        }
+    }
+
+    // PUT /api/receipts/{id}
+    // Used to correct lot numbers, dates, or change QualityStatus (e.g. Accepted → OnHold)
+    [HttpPut("{id:int}")]
+    [RoleAuthorize(Roles.Admin, Roles.ProcurementOfficer, Roles.SupplyManager, Roles.PharmacyManager)]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateReceiptRequest request)
+    {
+        var updated = await _service.UpdateReceiptAsync(id, request);
+        if (updated == null) return NotFound(new { message = $"Receipt {id} not found." });
+        return Ok(updated);
+    }
+
+    // DELETE /api/receipts/{id} — Admin only; prefer quality-status correction over deletion
+    [HttpDelete("{id:int}")]
+    [RoleAuthorize(Roles.Admin)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await _service.DeleteReceiptAsync(id);
+        if (!result) return NotFound(new { message = $"Receipt {id} not found." });
+        return NoContent();
+    }
+}

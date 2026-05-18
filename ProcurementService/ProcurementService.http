@@ -1,0 +1,215 @@
+@ProcurementService_HostAddress = http://localhost:5004
+
+### ── SUPPLIERS ──────────────────────────────────────────────────────────
+
+### Get all suppliers
+GET {{ProcurementService_HostAddress}}/api/suppliers
+Authorization: Bearer {{token}}
+
+###
+
+### Get supplier by ID
+GET {{ProcurementService_HostAddress}}/api/suppliers/1
+Authorization: Bearer {{token}}
+
+###
+
+### Get purchase orders for a supplier
+GET {{ProcurementService_HostAddress}}/api/suppliers/1/purchaseorders
+Authorization: Bearer {{token}}
+
+###
+
+### Create supplier
+POST {{ProcurementService_HostAddress}}/api/suppliers
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "PharmaCo Ltd",
+  "supplierType": "Manufacturer",
+  "status": "Active"
+}
+
+###
+
+### Update supplier
+PUT {{ProcurementService_HostAddress}}/api/suppliers/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "PharmaCo Ltd",
+  "supplierType": "Distributor",
+  "status": "Active"
+}
+
+###
+
+### Delete supplier (Admin only)
+DELETE {{ProcurementService_HostAddress}}/api/suppliers/1
+Authorization: Bearer {{token}}
+
+###
+
+### ── PURCHASE ORDERS ──────────────────────────────────────────────────
+
+### Get all purchase orders
+GET {{ProcurementService_HostAddress}}/api/purchaseorders
+Authorization: Bearer {{token}}
+
+###
+
+### Get purchase order by ID
+GET {{ProcurementService_HostAddress}}/api/purchaseorders/1
+Authorization: Bearer {{token}}
+
+###
+
+### Get receipts for a PO
+GET {{ProcurementService_HostAddress}}/api/purchaseorders/1/receipts
+Authorization: Bearer {{token}}
+
+###
+
+### Create purchase order (creates in Draft status)
+POST {{ProcurementService_HostAddress}}/api/purchaseorders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "supplierId": 1,
+  "orderDate": "2026-05-18T00:00:00Z",
+  "expectedDeliveryDate": "2026-06-01T00:00:00Z",
+  "notes": "Urgent restocking of surgical gloves"
+}
+
+###
+
+### Update purchase order (only while in Draft)
+PUT {{ProcurementService_HostAddress}}/api/purchaseorders/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "supplierId": 1,
+  "orderDate": "2026-05-18T00:00:00Z",
+  "expectedDeliveryDate": "2026-06-05T00:00:00Z",
+  "notes": "Updated delivery window"
+}
+
+###
+
+### Submit PO (Draft → Submitted)
+PATCH {{ProcurementService_HostAddress}}/api/purchaseorders/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Submitted"
+}
+
+###
+
+### Approve PO (Submitted → Approved)
+PATCH {{ProcurementService_HostAddress}}/api/purchaseorders/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Approved"
+}
+
+###
+
+### Mark PO as Shipped (Approved → Shipped)
+PATCH {{ProcurementService_HostAddress}}/api/purchaseorders/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Shipped"
+}
+
+###
+
+### Mark PO as FullyReceived (PartiallyReceived → FullyReceived)
+PATCH {{ProcurementService_HostAddress}}/api/purchaseorders/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "FullyReceived"
+}
+
+###
+
+### Cancel PO
+PATCH {{ProcurementService_HostAddress}}/api/purchaseorders/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Cancelled"
+}
+
+###
+
+### Delete PO (Draft or Cancelled only)
+DELETE {{ProcurementService_HostAddress}}/api/purchaseorders/1
+Authorization: Bearer {{token}}
+
+###
+
+### ── RECEIPTS (GRNs) ─────────────────────────────────────────────────
+
+### Get all receipts
+GET {{ProcurementService_HostAddress}}/api/receipts
+Authorization: Bearer {{token}}
+
+###
+
+### Get receipt by ID
+GET {{ProcurementService_HostAddress}}/api/receipts/1
+Authorization: Bearer {{token}}
+
+###
+
+### Create receipt against an Approved/Shipped PO
+POST {{ProcurementService_HostAddress}}/api/receipts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "poId": 1,
+  "supplierLot": "LOT-2026-0042",
+  "receivedDate": "2026-05-18T09:30:00Z",
+  "receivedBy": "John Smith",
+  "qualityStatus": "Accepted",
+  "quantityReceived": 500,
+  "remarks": "All boxes intact, temperature log checked"
+}
+
+###
+
+### Update receipt (e.g. change quality status to OnHold after lab failure)
+PUT {{ProcurementService_HostAddress}}/api/receipts/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "supplierLot": "LOT-2026-0042",
+  "receivedDate": "2026-05-18T09:30:00Z",
+  "receivedBy": "John Smith",
+  "qualityStatus": "OnHold",
+  "quantityReceived": 500,
+  "remarks": "Held pending microbiological test results"
+}
+
+###
+
+### Delete receipt (Admin only)
+DELETE {{ProcurementService_HostAddress}}/api/receipts/1
+Authorization: Bearer {{token}}
+
+###
