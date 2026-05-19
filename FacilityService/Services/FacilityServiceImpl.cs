@@ -16,6 +16,7 @@ public class FacilityServiceImpl : IFacilityService
     public async Task<IEnumerable<FacilityDto>> GetAllFacilitiesAsync()
     {
         return await _db.Facilities
+            .OrderByDescending(f => f.FacilityId)
             .Select(f => ToFacilityDto(f))
             .ToListAsync();
     }
@@ -75,6 +76,7 @@ public class FacilityServiceImpl : IFacilityService
     public async Task<IEnumerable<StorageZoneDto>> GetAllZonesAsync()
     {
         return await _db.StorageZones
+            .OrderByDescending(z => z.ZoneId)
             .Include(z => z.Facility)
             .Select(z => ToZoneDto(z))
             .ToListAsync();
@@ -84,6 +86,7 @@ public class FacilityServiceImpl : IFacilityService
     {
         return await _db.StorageZones
             .Where(z => z.FacilityId == facilityId)
+            .OrderByDescending(z => z.ZoneId)
             .Include(z => z.Facility)
             .Select(z => ToZoneDto(z))
             .ToListAsync();
@@ -100,6 +103,13 @@ public class FacilityServiceImpl : IFacilityService
 
     public async Task<StorageZoneDto> CreateZoneAsync(CreateStorageZoneRequest request)
     {
+        // Validate that the referenced facility exists before attempting the insert.
+        // Without this check, SQL Server throws a FK constraint violation (DbUpdateException).
+        var facilityExists = await _db.Facilities.AnyAsync(f => f.FacilityId == request.FacilityId);
+        if (!facilityExists)
+            throw new InvalidOperationException(
+                $"Facility with ID {request.FacilityId} does not exist.");
+
         var zone = new StorageZone
         {
             FacilityId         = request.FacilityId,

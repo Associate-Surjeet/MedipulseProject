@@ -14,7 +14,10 @@ public class ProcurementServiceImpl : IProcurementService
     // ── Suppliers ─────────────────────────────────────────────────────────
 
     public async Task<IEnumerable<SupplierDto>> GetAllSuppliersAsync()
-        => await _db.Suppliers.Select(s => ToSupplierDto(s)).ToListAsync();
+        => await _db.Suppliers
+            .OrderByDescending(s => s.SupplierId)
+            .Select(s => ToSupplierDto(s))
+            .ToListAsync();
 
     public async Task<SupplierDto?> GetSupplierByIdAsync(int id)
     {
@@ -70,6 +73,7 @@ public class ProcurementServiceImpl : IProcurementService
 
     public async Task<IEnumerable<PurchaseOrderDto>> GetAllPurchaseOrdersAsync()
         => await _db.PurchaseOrders
+            .OrderByDescending(po => po.PoId)
             .Include(po => po.Supplier)
             .Include(po => po.Receipts)
             .Select(po => ToPurchaseOrderDto(po))
@@ -78,6 +82,7 @@ public class ProcurementServiceImpl : IProcurementService
     public async Task<IEnumerable<PurchaseOrderDto>> GetPurchaseOrdersBySupplierAsync(int supplierId)
         => await _db.PurchaseOrders
             .Where(po => po.SupplierId == supplierId)
+            .OrderByDescending(po => po.PoId)
             .Include(po => po.Supplier)
             .Include(po => po.Receipts)
             .Select(po => ToPurchaseOrderDto(po))
@@ -188,6 +193,7 @@ public class ProcurementServiceImpl : IProcurementService
 
     public async Task<IEnumerable<ReceiptDto>> GetAllReceiptsAsync()
         => await _db.Receipts
+            .OrderByDescending(r => r.ReceiptId)
             .Include(r => r.PurchaseOrder).ThenInclude(po => po!.Supplier)
             .Select(r => ToReceiptDto(r))
             .ToListAsync();
@@ -195,6 +201,7 @@ public class ProcurementServiceImpl : IProcurementService
     public async Task<IEnumerable<ReceiptDto>> GetReceiptsByPoAsync(int poId)
         => await _db.Receipts
             .Where(r => r.PoId == poId)
+            .OrderByDescending(r => r.ReceiptId)
             .Include(r => r.PurchaseOrder).ThenInclude(po => po!.Supplier)
             .Select(r => ToReceiptDto(r))
             .ToListAsync();

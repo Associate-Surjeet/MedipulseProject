@@ -37,8 +37,15 @@ public class StorageZonesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateStorageZoneRequest request)
     {
-        var created = await _service.CreateZoneAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.ZoneId }, created);
+        try
+        {
+            var created = await _service.CreateZoneAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = created.ZoneId }, created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return UnprocessableEntity(new { message = ex.Message });
+        }
     }
 
     // PUT /api/storagezones/{id}

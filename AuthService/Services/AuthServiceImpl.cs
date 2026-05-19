@@ -84,6 +84,7 @@ public class AuthServiceImpl : IAuthService
     public async Task<List<UserDto>> GetAllUsersAsync()
     {
         return await _db.Users
+            .OrderByDescending(u => u.UserId)
             .Select(u => MapToDto(u))
             .ToListAsync();
     }
