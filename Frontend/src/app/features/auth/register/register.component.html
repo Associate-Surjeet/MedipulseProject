@@ -1,0 +1,181 @@
+<div class="mp-login-page">
+  <!-- Left panel (same branding as login) -->
+  <div class="mp-login-left">
+    <div class="mp-login-left__content">
+      <div class="mp-login-left__logo">
+        <span class="material-icons">local_hospital</span>
+      </div>
+      <h1 class="mp-login-left__title">MediPulse</h1>
+      <p class="mp-login-left__desc">
+        Clinical Logistics &amp; Inventory Intelligence Platform
+      </p>
+      <div class="mp-login-left__features">
+        <div class="mp-feature-item">
+          <span class="material-icons">verified_user</span>
+          <span>Role-based access control (RBAC)</span>
+        </div>
+        <div class="mp-feature-item">
+          <span class="material-icons">groups</span>
+          <span>8 clinical role types supported</span>
+        </div>
+        <div class="mp-feature-item">
+          <span class="material-icons">security</span>
+          <span>JWT-secured sessions</span>
+        </div>
+        <div class="mp-feature-item">
+          <span class="material-icons">fact_check</span>
+          <span>Full audit trail on all actions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="mp-login-right">
+    <div class="mp-login-card mp-login-card--wide">
+      <div class="mp-login-card__header">
+        <h2 class="mp-login-card__title">Create Account</h2>
+        <p class="mp-login-card__subtitle">
+          Register a new MediPulse user account
+        </p>
+      </div>
+
+      @if (errorMessage) {
+        <div class="mp-alert mp-alert--error">
+          <span class="material-icons">error_outline</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="mp-form-grid">
+          <!-- Full Name -->
+          <div class="mp-form-group mp-form-group--full">
+            <label class="mp-label" for="name">Full Name *</label>
+            <div class="mp-input-wrapper">
+              <span class="material-icons mp-input-icon">person</span>
+              <input
+                id="name"
+                type="text"
+                class="mp-input"
+                [class.mp-input--error]="nameError"
+                formControlName="name"
+                placeholder="Dr. Jane Smith"
+                autocomplete="name"
+              />
+            </div>
+            @if (nameError) {
+              <p class="mp-field-error">{{ nameError }}</p>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="mp-form-group mp-form-group--full">
+            <label class="mp-label" for="email">Email Address *</label>
+            <div class="mp-input-wrapper">
+              <span class="material-icons mp-input-icon">email</span>
+              <input
+                id="email"
+                type="email"
+                class="mp-input"
+                [class.mp-input--error]="emailError"
+                formControlName="email"
+                placeholder="you@hospital.org"
+                autocomplete="email"
+              />
+            </div>
+            @if (emailError) {
+              <p class="mp-field-error">{{ emailError }}</p>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="mp-form-group">
+            <label class="mp-label" for="password">Password *</label>
+            <div class="mp-input-wrapper">
+              <span class="material-icons mp-input-icon">lock</span>
+              <input
+                id="password"
+                [type]="showPassword ? 'text' : 'password'"
+                class="mp-input mp-input--with-action"
+                [class.mp-input--error]="passwordError"
+                formControlName="password"
+                placeholder="Min 8 chars, mixed case, digit, special"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="mp-input-action"
+                (click)="togglePassword()"
+                tabindex="-1"
+              >
+                <span class="material-icons">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+            @if (passwordError) {
+              <p class="mp-field-error">{{ passwordError }}</p>
+            }
+          </div>
+
+          <!-- Phone -->
+          <div class="mp-form-group">
+            <label class="mp-label" for="phone">Phone (optional)</label>
+            <div class="mp-input-wrapper">
+              <span class="material-icons mp-input-icon">phone</span>
+              <input
+                id="phone"
+                type="tel"
+                class="mp-input"
+                [class.mp-input--error]="phoneError"
+                formControlName="phone"
+                placeholder="10-digit number"
+                autocomplete="tel"
+              />
+            </div>
+            @if (phoneError) {
+              <p class="mp-field-error">{{ phoneError }}</p>
+            }
+          </div>
+
+          <!-- Role -->
+          <div class="mp-form-group mp-form-group--full">
+            <label class="mp-label" for="role">Role *</label>
+            <div class="mp-input-wrapper">
+              <span class="material-icons mp-input-icon">badge</span>
+              <select
+                id="role"
+                class="mp-input mp-input--select"
+                formControlName="role"
+              >
+                @for (role of allRoles; track role) {
+                  <option [value]="role">{{ getRoleDisplayName(role) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password requirements hint -->
+        <div class="mp-password-hint">
+          <span class="material-icons">info</span>
+          <span>
+            Password must be at least 8 characters with uppercase, lowercase,
+            a digit, and a special character (e.g. @#$!).
+          </span>
+        </div>
+
+        <button type="submit" class="mp-btn mp-btn--primary mp-btn--full">
+          <span class="material-icons">person_add</span>
+          Create Account
+        </button>
+      </form>
+
+      <div class="mp-login-card__back">
+        Already have an account?
+        <a routerLink="/login" class="mp-link">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>

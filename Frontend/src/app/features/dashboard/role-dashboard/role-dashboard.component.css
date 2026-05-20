@@ -1,0 +1,149 @@
+.mp-page { padding: 28px 32px; flex: 1; overflow-y: auto; }
+
+/* ── Welcome banner ── */
+.mp-welcome-banner {
+  display: flex; align-items: center; gap: 16px;
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  border: 1px solid #f1f5f9; border-left: 4px solid;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+
+.mp-welcome-banner__icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.mp-welcome-banner__icon .material-icons { font-size: 28px; }
+
+.mp-welcome-banner__text { flex: 1; min-width: 200px; }
+
+.mp-welcome-banner__title {
+  font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 6px;
+}
+
+.mp-welcome-banner__subtitle {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 13px; color: #64748b; margin: 0;
+}
+
+.mp-role-pill {
+  display: inline-block; padding: 2px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+}
+
+.mp-welcome-banner__date {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #94a3b8; white-space: nowrap;
+}
+
+/* ── KPI Grid ── */
+.mp-kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 28px;
+}
+
+.mp-kpi-card {
+  background: #fff; border-radius: 12px; padding: 18px;
+  display: flex; align-items: center; gap: 14px;
+  border: 1px solid #f1f5f9; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.mp-kpi-card__icon {
+  width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.mp-kpi-card__icon .material-icons { font-size: 22px; }
+
+.mp-kpi-card__value {
+  font-size: 26px; font-weight: 800; color: #0f172a; margin: 0 0 1px; line-height: 1;
+}
+.mp-kpi-card__label {
+  font-size: 12px; font-weight: 600; color: #374151; margin: 0 0 1px;
+}
+.mp-kpi-card__desc {
+  font-size: 11px; color: #9ca3af; margin: 0;
+}
+
+/* ── Section header ── */
+.mp-section-header { margin-bottom: 16px; }
+
+.mp-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 4px;
+}
+.mp-section-title .material-icons { font-size: 20px; color: #6b7280; }
+
+.mp-section-subtitle { font-size: 12px; color: #64748b; margin: 0; }
+
+/* ── Module grid ── */
+.mp-module-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px; margin-bottom: 28px;
+}
+
+.mp-module-card {
+  background: #fff; border-radius: 12px; padding: 18px;
+  border: 1px solid #f1f5f9; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex; align-items: center; gap: 14px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.mp-module-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: #e2e8f0;
+}
+
+.mp-module-card--primary {
+  border-left: 3px solid var(--accent);
+}
+
+.mp-module-card__icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: #f8fafc; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mp-module-card__icon .material-icons {
+  font-size: 22px; color: #64748b;
+}
+.mp-module-card--primary .mp-module-card__icon {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.mp-module-card--primary .mp-module-card__icon .material-icons {
+  color: var(--accent);
+}
+
+.mp-module-card__body { flex: 1; min-width: 0; }
+.mp-module-card__title {
+  font-size: 14px; font-weight: 600; color: #1e293b; margin: 0 0 3px;
+}
+.mp-module-card__desc {
+  font-size: 11px; color: #94a3b8; margin: 0;
+}
+
+.mp-module-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.mp-module-badge--active { background: #f0fdf4; color: #15803d; }
+.mp-module-badge--soon   { background: #f8fafc; color: #94a3b8; }
+
+/* ── Info panel ── */
+.mp-info-panel {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+  padding: 14px 18px;
+}
+.mp-info-panel__icon { font-size: 20px; color: #2563eb; margin-top: 1px; flex-shrink: 0; }
+.mp-info-panel__title {
+  font-size: 13px; font-weight: 600; color: #1e40af; margin: 0 0 4px;
+}
+.mp-info-panel__desc {
+  font-size: 12px; color: #3b82f6; margin: 0; line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .mp-page { padding: 16px; }
+  .mp-welcome-banner { flex-direction: column; align-items: flex-start; }
+}

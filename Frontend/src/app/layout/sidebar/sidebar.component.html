@@ -1,0 +1,32 @@
+<aside class="mp-sidebar">
+  @if (config) {
+    <div class="mp-sidebar__role-badge" [style.background]="config.color + '18'" [style.border-color]="config.color + '40'">
+      <span class="material-icons mp-sidebar__role-icon" [style.color]="config.color">
+        {{ config.icon }}
+      </span>
+      <div>
+        <p class="mp-sidebar__role-title" [style.color]="config.color">{{ config.title }}</p>
+        <p class="mp-sidebar__role-sub">{{ config.subtitle }}</p>
+      </div>
+    </div>
+  }
+
+  <nav class="mp-sidebar__nav">
+    <p class="mp-sidebar__section-label">Navigation</p>
+    @for (item of navItems; track item.label) {
+      <button
+        class="mp-sidebar__nav-item"
+        [class.mp-sidebar__nav-item--active]="isActive(item.route)"
+        (click)="navigate(item.route)"
+      >
+        <span class="material-icons mp-sidebar__nav-icon">{{ item.icon }}</span>
+        <span class="mp-sidebar__nav-label">{{ item.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <div class="mp-sidebar__footer">
+    <span class="material-icons" style="font-size:14px; color:#94a3b8;">info</span>
+    <span>MediPulse v1.0</span>
+  </div>
+</aside>

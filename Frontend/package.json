@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host=127.0.0.1",
+    "start": "ng serve --host=localhost",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -17,9 +17,10 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "jest-editor-support": "*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "jest-editor-support": "*"
+    "zone.js": "^0.16.2"
   },
   "devDependencies": {
     "@angular/build": "^21.2.9",

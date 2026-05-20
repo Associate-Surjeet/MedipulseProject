@@ -1,0 +1,47 @@
+<header class="mp-header">
+  <div class="mp-header__brand">
+    <span class="material-icons mp-header__logo-icon">local_hospital</span>
+    <div class="mp-header__brand-text">
+      <span class="mp-header__title">MediPulse</span>
+      <span class="mp-header__subtitle">Clinical Logistics Platform</span>
+    </div>
+  </div>
+
+  <div class="mp-header__actions">
+    <button class="mp-header__icon-btn" title="Notifications">
+      <span class="material-icons">notifications</span>
+      <span class="mp-header__badge">3</span>
+    </button>
+
+    <div class="mp-user-menu">
+      <button class="mp-user-menu__trigger" (click)="toggleUserMenu()">
+        <div class="mp-avatar">{{ userInitials }}</div>
+        <div class="mp-user-menu__info">
+          <span class="mp-user-menu__name">{{ currentUser?.name }}</span>
+          <span class="mp-user-menu__role">{{ roleDisplayName }}</span>
+        </div>
+        <span class="material-icons mp-user-menu__chevron">
+          {{ showUserMenu ? 'expand_less' : 'expand_more' }}
+        </span>
+      </button>
+
+      @if (showUserMenu) {
+        <div class="mp-user-menu__dropdown">
+          <div class="mp-user-menu__dropdown-header">
+            <div class="mp-avatar mp-avatar--lg">{{ userInitials }}</div>
+            <div>
+              <p class="mp-user-menu__dropdown-name">{{ currentUser?.name }}</p>
+              <p class="mp-user-menu__dropdown-email">{{ currentUser?.email }}</p>
+              <span class="mp-role-badge">{{ roleDisplayName }}</span>
+            </div>
+          </div>
+          <hr class="mp-divider" />
+          <button class="mp-user-menu__item" (click)="logout()">
+            <span class="material-icons">logout</span>
+            Sign Out
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

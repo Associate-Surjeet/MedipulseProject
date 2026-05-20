@@ -12,7 +12,9 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(
+                  "http://localhost:4200",
+                  "http://127.0.0.1:4200")   // Angular dev server may bind to either
               .AllowAnyHeader()
               .AllowAnyMethod());
 });

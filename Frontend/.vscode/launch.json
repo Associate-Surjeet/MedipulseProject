@@ -2,18 +2,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "edge",
-      "request": "launch",
-      "name": "localhost (Edge)",
-      "url": "http://localhost:60813",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
       "type": "chrome",
       "request": "launch",
-      "name": "localhost (Chrome)",
-      "url": "http://localhost:60813",
-      "webRoot": "${workspaceFolder}"
+      "name": "Launch Angular (Chrome)",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "npm: start",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+(http://localhost:[0-9]+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    },
+    {
+      "type": "edge",
+      "request": "launch",
+      "name": "Launch Angular (Edge)",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "npm: start",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+(http://localhost:[0-9]+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
     }
   ]
 }

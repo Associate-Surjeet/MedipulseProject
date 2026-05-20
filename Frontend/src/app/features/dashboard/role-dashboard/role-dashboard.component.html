@@ -1,0 +1,96 @@
+<div class="mp-page">
+  @if (config && currentUser) {
+    <!-- Welcome banner -->
+    <div class="mp-welcome-banner" [style.border-left-color]="config.color">
+      <div class="mp-welcome-banner__icon" [style.background]="config.color + '18'">
+        <span class="material-icons" [style.color]="config.color">{{ config.icon }}</span>
+      </div>
+      <div class="mp-welcome-banner__text">
+        <h1 class="mp-welcome-banner__title">
+          {{ greeting }}, {{ currentUser.name }}
+        </h1>
+        <p class="mp-welcome-banner__subtitle">
+          <span class="mp-role-pill" [style.background]="config.color + '18'" [style.color]="config.color">
+            {{ roleDisplayName }}
+          </span>
+          &nbsp;{{ config.subtitle }}
+        </p>
+      </div>
+      <div class="mp-welcome-banner__date">
+        <span class="material-icons" style="font-size:16px; color:#94a3b8">calendar_today</span>
+        {{ currentDate | date:'EEEE, MMMM d, y' }}
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="mp-kpi-grid">
+      @for (card of config.kpiCards; track card.label) {
+        <div class="mp-kpi-card">
+          <div class="mp-kpi-card__icon" [style.background]="card.color + '18'">
+            <span class="material-icons" [style.color]="card.color">{{ card.icon }}</span>
+          </div>
+          <div class="mp-kpi-card__body">
+            <p class="mp-kpi-card__value">—</p>
+            <p class="mp-kpi-card__label">{{ card.label }}</p>
+            <p class="mp-kpi-card__desc">{{ card.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Module access cards -->
+    <div class="mp-section-header">
+      <h2 class="mp-section-title">
+        <span class="material-icons">apps</span>
+        Your Assigned Modules
+      </h2>
+      <p class="mp-section-subtitle">
+        Access the modules assigned to your role
+      </p>
+    </div>
+
+    <div class="mp-module-grid">
+      @for (item of config.navItems; let i = $index; track item.label) {
+        <div
+          class="mp-module-card"
+          [style.--accent]="config.color"
+          [class.mp-module-card--primary]="i === 0"
+        >
+          <div class="mp-module-card__icon">
+            <span class="material-icons">{{ item.icon }}</span>
+          </div>
+          <div class="mp-module-card__body">
+            <h3 class="mp-module-card__title">{{ item.label }}</h3>
+            <p class="mp-module-card__desc">
+              @if (i === 0) {
+                Primary dashboard view
+              } @else {
+                Available module
+              }
+            </p>
+          </div>
+          <div class="mp-module-card__badge">
+            @if (i === 0) {
+              <span class="mp-module-badge mp-module-badge--active">Active</span>
+            } @else {
+              <span class="mp-module-badge mp-module-badge--soon">Coming Soon</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Info panel -->
+    <div class="mp-info-panel">
+      <span class="material-icons mp-info-panel__icon">info</span>
+      <div>
+        <p class="mp-info-panel__title">Role-Based Access Control</p>
+        <p class="mp-info-panel__desc">
+          You are logged in as <strong>{{ roleDisplayName }}</strong>. Your dashboard
+          shows only the modules and data relevant to your role. Contact your
+          Administrator to request additional access.
+        </p>
+      </div>
+    </div>
+  }
+</div>

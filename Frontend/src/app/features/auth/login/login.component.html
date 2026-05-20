@@ -1,0 +1,121 @@
+<div class="mp-login-page">
+  <div class="mp-login-left">
+    <div class="mp-login-left__content">
+      <div class="mp-login-left__logo">
+        <span class="material-icons">local_hospital</span>
+      </div>
+      <h1 class="mp-login-left__title">MediPulse</h1>
+      <p class="mp-login-left__desc">
+        Clinical Logistics &amp; Inventory Intelligence Platform
+      </p>
+      <div class="mp-login-left__features">
+        <div class="mp-feature-item">
+          <span class="material-icons">inventory_2</span>
+          <span>Real-time inventory &amp; lot tracking</span>
+        </div>
+        <div class="mp-feature-item">
+          <span class="material-icons">ac_unit</span>
+          <span>Cold chain &amp; temperature monitoring</span>
+        </div>
+        <div class="mp-feature-item">
+          <span class="material-icons">warning_amber</span>
+          <span>Exception &amp; recall management</span>
+        </div>
+        <div class="mp-feature-item">
+          <span class="material-icons">analytics</span>
+          <span>Forecasting &amp; replenishment insights</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mp-login-right">
+    <div class="mp-login-card">
+      <div class="mp-login-card__header">
+        <h2 class="mp-login-card__title">Sign In</h2>
+        <p class="mp-login-card__subtitle">
+          Access your role-based dashboard
+        </p>
+      </div>
+
+      @if (successMessage) {
+        <div class="mp-alert mp-alert--success">
+          <span class="material-icons">check_circle</span>
+          <span>{{ successMessage }}</span>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="mp-alert mp-alert--error">
+          <span class="material-icons">error_outline</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="mp-form-group">
+          <label class="mp-label" for="email">Email Address</label>
+          <div class="mp-input-wrapper">
+            <span class="material-icons mp-input-icon">email</span>
+            <input
+              id="email"
+              type="email"
+              class="mp-input"
+              [class.mp-input--error]="emailError"
+              formControlName="email"
+              placeholder="you@hospital.org"
+              autocomplete="email"
+            />
+          </div>
+          @if (emailError) {
+            <p class="mp-field-error">{{ emailError }}</p>
+          }
+        </div>
+
+        <div class="mp-form-group">
+          <label class="mp-label" for="password">Password</label>
+          <div class="mp-input-wrapper">
+            <span class="material-icons mp-input-icon">lock</span>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="mp-input mp-input--with-action"
+              [class.mp-input--error]="passwordError"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="mp-input-action"
+              (click)="togglePassword()"
+              tabindex="-1"
+            >
+              <span class="material-icons">
+                {{ showPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          @if (passwordError) {
+            <p class="mp-field-error">{{ passwordError }}</p>
+          }
+        </div>
+
+        <button type="submit" class="mp-btn mp-btn--primary mp-btn--full">
+          <span class="material-icons">login</span>
+          Sign In
+        </button>
+      </form>
+
+      <div class="mp-login-card__register">
+        Don't have an account?
+        <a routerLink="/register" class="mp-link">Create one</a>
+      </div>
+
+      <div class="mp-login-card__footer">
+        <span class="material-icons mp-secure-icon">verified_user</span>
+        <span>Secured with JWT authentication &amp; RBAC</span>
+      </div>
+    </div>
+  </div>
+</div>
