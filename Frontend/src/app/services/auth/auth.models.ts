@@ -16,7 +16,6 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone?: string;
-  role?: string;
 }
 
 export interface UserDto {

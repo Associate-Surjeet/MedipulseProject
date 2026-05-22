@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
 import { UserDto } from '../../../services/auth/auth.models';
 import { getAllRoles, getRoleDisplayName } from '../../../shared/extensions/app.extensions';
 
 @Component({
   selector: 'app-admin-dashboard',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css',
 })
@@ -16,31 +19,18 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(private authService: AuthService) {}
 
-  ngOnInit(): void {
-    this.loadUsers();
-  }
+  ngOnInit(): void { this.loadUsers(); }
 
   loadUsers(): void {
     this.isLoading = true;
     this.authService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Failed to load users.';
-        this.isLoading = false;
-      },
+      next: (users) => { this.users = users; this.isLoading = false; },
+      error: () => { this.errorMessage = 'Failed to load users.'; this.isLoading = false; },
     });
   }
 
-  get totalUsers(): number {
-    return this.users.length;
-  }
-
-  get adminCount(): number {
-    return this.users.filter((u) => u.role === 'Admin').length;
-  }
+  get totalUsers(): number { return this.users.length; }
+  get adminCount(): number { return this.users.filter((u) => u.role === 'Admin').length; }
 
   get roleBreakdown(): { role: string; display: string; count: number; color: string }[] {
     const colors: Record<string, string> = {
@@ -49,23 +39,20 @@ export class AdminDashboardComponent implements OnInit {
       ColdChainOperator: '#0284c7', Nurse: '#059669', ComplianceOfficer: '#64748b',
     };
     return getAllRoles().map((role) => ({
-      role,
-      display: getRoleDisplayName(role),
+      role, display: getRoleDisplayName(role),
       count: this.users.filter((u) => u.role === role).length,
       color: colors[role] ?? '#6b7280',
     }));
   }
 
-  getRoleDisplayName(role: string): string {
-    return getRoleDisplayName(role);
-  }
+  getRoleDisplayName(role: string): string { return getRoleDisplayName(role); }
 
   getRoleBadgeClass(role: string): string {
     const map: Record<string, string> = {
-      Admin: 'badge--red', SupplyManager: 'badge--blue', PharmacyManager: 'badge--purple',
-      DeviceManager: 'badge--cyan', ProcurementOfficer: 'badge--amber',
-      ColdChainOperator: 'badge--sky', Nurse: 'badge--green', ComplianceOfficer: 'badge--slate',
+      Admin: 'bg-danger', SupplyManager: 'bg-primary', PharmacyManager: 'bg-info text-dark',
+      DeviceManager: 'bg-warning text-dark', ProcurementOfficer: 'bg-warning text-dark',
+      ColdChainOperator: 'bg-info text-dark', Nurse: 'bg-success', ComplianceOfficer: 'bg-secondary',
     };
-    return map[role] ?? 'badge--slate';
+    return map[role] ?? 'bg-secondary';
   }
 }

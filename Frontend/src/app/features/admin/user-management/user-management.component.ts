@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../services/auth/auth.service';
 import { UserDto } from '../../../services/auth/auth.models';
@@ -7,7 +9,8 @@ import { getAllRoles, getRoleDisplayName } from '../../../shared/extensions/app.
 
 @Component({
   selector: 'app-user-management',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css',
 })
@@ -48,29 +51,19 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.loadUsers();
-  }
+  ngOnInit(): void { this.loadUsers(); }
 
   loadUsers(): void {
     this.isLoading = true;
     this.authService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (err: HttpErrorResponse) => {
-        this.errorMessage = err.error?.message ?? 'Failed to load users.';
-        this.isLoading = false;
-      },
+      next: (users) => { this.users = users; this.applyFilters(); this.isLoading = false; },
+      error: (err: HttpErrorResponse) => { this.errorMessage = err.error?.message ?? 'Failed to load users.'; this.isLoading = false; },
     });
   }
 
   applyFilters(): void {
     this.filteredUsers = this.users.filter((u) => {
-      const matchSearch =
-        !this.searchQuery ||
+      const matchSearch = !this.searchQuery ||
         u.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         u.email.toLowerCase().includes(this.searchQuery.toLowerCase());
       const matchRole = !this.selectedRoleFilter || u.role === this.selectedRoleFilter;
@@ -78,15 +71,8 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
-  onSearch(value: string): void {
-    this.searchQuery = value;
-    this.applyFilters();
-  }
-
-  onRoleFilter(value: string): void {
-    this.selectedRoleFilter = value;
-    this.applyFilters();
-  }
+  onSearch(value: string): void { this.searchQuery = value; this.applyFilters(); }
+  onRoleFilter(value: string): void { this.selectedRoleFilter = value; this.applyFilters(); }
 
   openRoleModal(user: UserDto): void {
     this.selectedUser = user;
@@ -94,116 +80,69 @@ export class UserManagementComponent implements OnInit {
     this.showRoleModal = true;
   }
 
-  closeRoleModal(): void {
-    this.showRoleModal = false;
-    this.selectedUser  = null;
-  }
+  closeRoleModal(): void { this.showRoleModal = false; this.selectedUser = null; }
 
   saveRole(): void {
     const user = this.selectedUser;
     if (this.roleForm.invalid || !user) return;
-
     this.isUpdating = true;
     this.authService.updateUserRole(user.userId, this.roleForm.value).subscribe({
-      next: () => {
-        this.isUpdating = false;
-        this.showSuccess('Role updated successfully.');
-        this.closeRoleModal();
-        this.loadUsers();
-      },
-      error: (err: HttpErrorResponse) => {
-        this.isUpdating = false;
-        this.errorMessage = err.error?.message ?? 'Failed to update role.';
-      },
+      next: () => { this.isUpdating = false; this.showSuccess('Role updated successfully.'); this.closeRoleModal(); this.loadUsers(); },
+      error: (err: HttpErrorResponse) => { this.isUpdating = false; this.errorMessage = err.error?.message ?? 'Failed to update role.'; },
     });
   }
 
-  openAddModal(): void {
-    this.addForm.reset({ role: 'Nurse' });
-    this.showAddModal = true;
-  }
-
-  closeAddModal(): void {
-    this.showAddModal = false;
-  }
+  openAddModal(): void { this.addForm.reset({ role: 'Nurse' }); this.showAddModal = true; }
+  closeAddModal(): void { this.showAddModal = false; }
 
   addUser(): void {
-    if (this.addForm.invalid) {
-      this.addForm.markAllAsTouched();
-      return;
-    }
+    if (this.addForm.invalid) { this.addForm.markAllAsTouched(); return; }
     this.isAdding = true;
     const val = this.addForm.value;
     this.authService.register({
-      name:     val.name,
-      email:    val.email,
-      password: val.password,
-      phone:    val.phone || undefined,
-      role:     val.role,
+      name: val.name, email: val.email, password: val.password, phone: val.phone || undefined,
     }).subscribe({
-      next: () => {
-        this.isAdding = false;
-        this.showSuccess('User created successfully.');
-        this.closeAddModal();
-        this.loadUsers();
+      next: (newUser) => {
+        this.authService.updateUserRole(newUser.userId, { role: val.role }).subscribe({
+          next: () => { this.isAdding = false; this.showSuccess('User created successfully.'); this.closeAddModal(); this.loadUsers(); },
+          error: () => { this.isAdding = false; this.showSuccess('User created but role could not be assigned. Update it manually.'); this.closeAddModal(); this.loadUsers(); },
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.isAdding = false;
-        if (err.status === 409) {
-          this.errorMessage = 'A user with this email already exists.';
-        } else {
-          this.errorMessage = err.error?.message ?? 'Failed to create user.';
-        }
+        if (err.status === 409) this.errorMessage = 'A user with this email already exists.';
+        else this.errorMessage = err.error?.message ?? 'Failed to create user.';
       },
     });
   }
 
-  confirmDelete(user: UserDto): void {
-    this.userToDelete      = user;
-    this.showDeleteConfirm = true;
-  }
-
-  cancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.userToDelete      = null;
-  }
+  confirmDelete(user: UserDto): void { this.userToDelete = user; this.showDeleteConfirm = true; }
+  cancelDelete(): void { this.showDeleteConfirm = false; this.userToDelete = null; }
 
   deleteUser(): void {
     const user = this.userToDelete;
     if (!user) return;
-
     this.isDeleting = true;
     this.authService.deleteUser(user.userId).subscribe({
-      next: () => {
-        this.isDeleting = false;
-        this.showSuccess('User deleted successfully.');
-        this.cancelDelete();
-        this.loadUsers();
-      },
-      error: (err: HttpErrorResponse) => {
-        this.isDeleting = false;
-        this.errorMessage = err.error?.message ?? 'Failed to delete user.';
-        this.cancelDelete();
-      },
+      next: () => { this.isDeleting = false; this.showSuccess('User deleted successfully.'); this.cancelDelete(); this.loadUsers(); },
+      error: (err: HttpErrorResponse) => { this.isDeleting = false; this.errorMessage = err.error?.message ?? 'Failed to delete user.'; this.cancelDelete(); },
     });
   }
 
-  getRoleDisplayName(role: string): string {
-    return getRoleDisplayName(role);
-  }
+  getRoleDisplayName(role: string): string { return getRoleDisplayName(role); }
 
   getRoleBadgeClass(role: string): string {
     const map: Record<string, string> = {
-      Admin: 'badge--red', SupplyManager: 'badge--blue', PharmacyManager: 'badge--purple',
-      DeviceManager: 'badge--cyan', ProcurementOfficer: 'badge--amber',
-      ColdChainOperator: 'badge--sky', Nurse: 'badge--green', ComplianceOfficer: 'badge--slate',
+      Admin: 'bg-danger', SupplyManager: 'bg-primary', PharmacyManager: 'bg-info text-dark',
+      DeviceManager: 'bg-warning text-dark', ProcurementOfficer: 'bg-warning text-dark',
+      ColdChainOperator: 'bg-info text-dark', Nurse: 'bg-success', ComplianceOfficer: 'bg-secondary',
     };
-    return map[role] ?? 'badge--slate';
+    return map[role] ?? 'bg-secondary';
   }
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
-    this.errorMessage   = '';
+    this.errorMessage = '';
     setTimeout(() => (this.successMessage = ''), 3500);
   }
 }

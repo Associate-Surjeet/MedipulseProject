@@ -12,4 +12,5 @@ public static class Roles
     public const string ColdChainOperator = "ColdChainOperator";
     public const string Nurse             = "Nurse";
     public const string ComplianceOfficer = "ComplianceOfficer";
+    public const string Unassigned        = "Unassigned";
 }

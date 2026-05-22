@@ -1,11 +1,1 @@
-.mp-app-body {
-  display: flex;
-  min-height: calc(100vh - 64px);
-}
-
-.mp-main-content {
-  flex: 1;
-  background: #f1f5f9;
-  overflow-y: auto;
-  min-height: calc(100vh - 64px);
-}
+/* App root styles — layout handled globally in styles.css */

@@ -1,0 +1,173 @@
+<div class="container-fluid py-4 px-4">
+
+  <div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h2 class="mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Telemetry Records</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a class="text-white-50" routerLink="/dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active">Telemetry Records</li>
+          </ol>
+        </nav>
+      </div>
+      <button class="btn btn-light fw-semibold px-4 shadow-sm" (click)="openAdd()">
+        <i class="bi bi-plus-lg me-1"></i>Add Record
+      </button>
+    </div>
+  </div>
+
+  @if (successMessage) {
+    <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4 shadow-sm">
+      <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+    </div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4 shadow-sm">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+    </div>
+  }
+
+  <div class="data-card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span class="fw-semibold text-secondary small">
+        <i class="bi bi-list-ul me-1"></i>All Telemetry Records
+        <span class="badge bg-success ms-2">{{ filtered.length }}</span>
+      </span>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="width:160px" [(ngModel)]="filterExcursion" (change)="applyFilter()">
+          <option value="">All Records</option>
+          <option value="yes">Excursions Only</option>
+          <option value="no">Normal Only</option>
+        </select>
+        <input type="text" class="search-box" placeholder="Search by sensor, type, location…" style="width:240px"
+               [(ngModel)]="search" (input)="applyFilter()" />
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="empty-state"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading…</p></div>
+    } @else if (filtered.length === 0) {
+      <div class="empty-state"><i class="bi bi-graph-up-arrow"></i><p class="fw-semibold mb-1">No telemetry records found</p><p class="small">Records will appear here as sensors report data.</p></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:50px">#</th>
+              <th>Sensor</th>
+              <th>Type</th>
+              <th>Timestamp</th>
+              <th class="text-center">Temp (°C)</th>
+              <th class="text-center">Humidity (%)</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th class="text-center" style="width:120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of filtered; track r.telemetryId; let i = $index) {
+              <tr [class.table-danger]="r.isExcursion" [class.bg-opacity-25]="r.isExcursion">
+                <td class="text-muted">{{ i + 1 }}</td>
+                <td class="text-muted fw-semibold">#{{ r.sensorId }}</td>
+                <td><span class="badge badge-status" [ngClass]="typeBadge(r.deviceType)">{{ r.deviceType }}</span></td>
+                <td>{{ r.timestamp | date:'dd MMM yyyy, HH:mm' }}</td>
+                <td class="text-center">{{ r.temperature != null ? r.temperature : '—' }}</td>
+                <td class="text-center">{{ r.humidity != null ? r.humidity : '—' }}</td>
+                <td>{{ r.location || '—' }}</td>
+                <td>
+                  <span class="badge badge-status" [ngClass]="excursionBadge(r.isExcursion)">{{ r.isExcursion ? 'Excursion' : 'Normal' }}</span>
+                  @if (r.isExcursion && r.excursionNote) {
+                    <i class="bi bi-info-circle-fill text-danger ms-1" style="font-size:0.85rem" [title]="r.excursionNote"></i>
+                  }
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-1">
+                    <button class="btn btn-sm btn-outline-warning" title="Edit" (click)="openEdit(r)"><i class="bi bi-pencil-fill"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" title="Delete" (click)="confirmDelete(r)"><i class="bi bi-trash-fill"></i></button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (showModal) {
+  <div class="modal d-block" style="background:rgba(0,0,0,.5)" (click)="closeModal()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header" [class]="editId ? 'gradient-header-edit' : 'gradient-header'">
+          <h5 class="modal-title"><i class="bi bi-graph-up-arrow me-2"></i>{{ editId ? 'Edit Record' : 'Add Telemetry Record' }}</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form [formGroup]="form">
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">Sensor *</label>
+                <select class="form-select" formControlName="sensorId" [attr.disabled]="editId ? true : null">
+                  <option [value]="null">— Select Sensor —</option>
+                  @for (s of sensors; track s.sensorId) { <option [value]="s.sensorId">Sensor #{{ s.sensorId }} — {{ s.deviceType }} ({{ s.status }})</option> }
+                </select>
+                @if (form.get('sensorId')?.touched && form.get('sensorId')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Sensor is required.</div>
+                }
+              </div>
+              <div class="col-6">
+                <label class="form-label">Timestamp *</label>
+                <input class="form-control" type="datetime-local" formControlName="timestamp" />
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">Temperature (°C)</label>
+                <input class="form-control" type="number" step="0.1" formControlName="temperature" placeholder="e.g. 4.5" />
+              </div>
+              <div class="col-6">
+                <label class="form-label">Humidity (%)</label>
+                <input class="form-control" type="number" step="0.1" formControlName="humidity" placeholder="e.g. 65.0" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Location</label>
+              <input class="form-control" formControlName="location" placeholder="e.g. Ward B, Zone A3 (optional)" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn btn-outline-secondary" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-primary px-4" (click)="save()" [disabled]="isSaving">
+            @if (isSaving) { <span class="spinner-border spinner-border-sm me-2"></span> } @else { <i class="bi bi-save me-2"></i> }
+            {{ isSaving ? 'Saving…' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeleteConfirm) {
+  <div class="modal d-block" style="background:rgba(0,0,0,.5)" (click)="cancelDelete()">
+    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+            <i class="bi bi-trash-fill text-danger fs-3"></i>
+          </div>
+          <h5 class="fw-bold">Delete Record?</h5>
+          <p class="text-muted small">Delete telemetry record #{{ deleteTarget?.telemetryId }}? This cannot be undone.</p>
+        </div>
+        <div class="modal-footer border-0 justify-content-center gap-2">
+          <button class="btn btn-outline-secondary" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn-danger px-4" (click)="doDelete()" [disabled]="isDeleting">
+            @if (isDeleting) { <span class="spinner-border spinner-border-sm me-2"></span> } @else { <i class="bi bi-trash-fill me-2"></i> }Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

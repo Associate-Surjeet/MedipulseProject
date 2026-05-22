@@ -20,6 +20,7 @@ public class RegisterRequest
     [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Phone must be exactly 10 digits.")]
     public string? Phone { get; set; }
 
-    // Optional — defaults to "User" if not provided. Admin can change it later via PUT /api/users/{id}/role.
-    public string Role { get; set; } = "User";
+    // Role is always set to "Unassigned" on registration.
+    // Admin must assign a real role via PUT /api/users/{id}/role before the user can access the system.
+    internal string Role { get; set; } = "Unassigned";
 }

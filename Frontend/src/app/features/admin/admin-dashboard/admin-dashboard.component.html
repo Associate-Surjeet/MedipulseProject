@@ -1,136 +1,129 @@
-<div class="mp-page">
-  <div class="mp-page__header">
-    <div>
-      <h1 class="mp-page__title">
-        <span class="material-icons mp-page__title-icon">admin_panel_settings</span>
-        Admin Console
-      </h1>
-      <p class="mp-page__subtitle">System overview and user management</p>
-    </div>
-    <a routerLink="/admin/users" class="mp-btn mp-btn--primary">
-      <span class="material-icons">manage_accounts</span>
-      Manage Users
-    </a>
-  </div>
+<div class="container-fluid py-4 px-4">
 
-  <!-- KPI cards -->
-  <div class="mp-kpi-grid">
-    <div class="mp-kpi-card mp-kpi-card--blue">
-      <div class="mp-kpi-card__icon">
-        <span class="material-icons">people</span>
+  <div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h2 class="mb-1"><i class="bi bi-shield-lock-fill me-2"></i>Admin Console</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a class="text-white-50" routerLink="/dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item active">Admin Console</li>
+          </ol>
+        </nav>
       </div>
-      <div class="mp-kpi-card__body">
-        <p class="mp-kpi-card__value">{{ totalUsers }}</p>
-        <p class="mp-kpi-card__label">Total Users</p>
-      </div>
-    </div>
-    <div class="mp-kpi-card mp-kpi-card--red">
-      <div class="mp-kpi-card__icon">
-        <span class="material-icons">admin_panel_settings</span>
-      </div>
-      <div class="mp-kpi-card__body">
-        <p class="mp-kpi-card__value">{{ adminCount }}</p>
-        <p class="mp-kpi-card__label">Administrators</p>
-      </div>
-    </div>
-    <div class="mp-kpi-card mp-kpi-card--green">
-      <div class="mp-kpi-card__icon">
-        <span class="material-icons">verified_user</span>
-      </div>
-      <div class="mp-kpi-card__body">
-        <p class="mp-kpi-card__value">{{ totalUsers - adminCount }}</p>
-        <p class="mp-kpi-card__label">Clinical Staff</p>
-      </div>
-    </div>
-    <div class="mp-kpi-card mp-kpi-card--purple">
-      <div class="mp-kpi-card__icon">
-        <span class="material-icons">groups</span>
-      </div>
-      <div class="mp-kpi-card__body">
-        <p class="mp-kpi-card__value">8</p>
-        <p class="mp-kpi-card__label">Active Roles</p>
-      </div>
+      <a routerLink="/admin/users" class="btn btn-light fw-semibold px-4 shadow-sm">
+        <i class="bi bi-people-fill me-1"></i>Manage Users
+      </a>
     </div>
   </div>
 
-  <div class="mp-dashboard-grid">
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="kpi-card" style="--kpi-color:#0d6efd"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">{{ totalUsers }}</div><div class="kpi-label">Total Users</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card" style="--kpi-color:#dc3545"><div class="kpi-icon"><i class="bi bi-shield-fill-check"></i></div><div class="kpi-value">{{ adminCount }}</div><div class="kpi-label">Administrators</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card" style="--kpi-color:#198754"><div class="kpi-icon"><i class="bi bi-person-check-fill"></i></div><div class="kpi-value">{{ totalUsers - adminCount }}</div><div class="kpi-label">Clinical Staff</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card" style="--kpi-color:#6f42c1"><div class="kpi-icon"><i class="bi bi-diagram-3-fill"></i></div><div class="kpi-value">8</div><div class="kpi-label">Active Roles</div></div>
+    </div>
+  </div>
+
+  <!-- Dashboard grid -->
+  <div class="row g-4">
+
     <!-- Role breakdown -->
-    <div class="mp-card">
-      <div class="mp-card__header">
-        <h2 class="mp-card__title">
-          <span class="material-icons">pie_chart</span>
-          Users by Role
-        </h2>
-      </div>
-      <div class="mp-card__body">
-        @if (isLoading) {
-          <div class="mp-loading">
-            <span class="mp-spinner mp-spinner--dark"></span>
-            Loading role data...
-          </div>
-        } @else {
-          @for (item of roleBreakdown; track item.role) {
-            <div class="mp-role-row">
-              <div class="mp-role-row__info">
-                <span class="mp-role-dot" [style.background]="item.color"></span>
-                <span class="mp-role-row__name">{{ item.display }}</span>
-              </div>
-              <div class="mp-role-row__bar-wrap">
-                <div
-                  class="mp-role-row__bar"
-                  [style.width.%]="totalUsers > 0 ? (item.count / totalUsers) * 100 : 0"
-                  [style.background]="item.color"
-                ></div>
-              </div>
-              <span class="mp-role-row__count">{{ item.count }}</span>
+    <div class="col-lg-6">
+      <div class="data-card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pie-chart-fill text-primary"></i>
+          <span class="fw-semibold text-secondary small">USERS BY ROLE</span>
+        </div>
+        <div class="p-4">
+          @if (isLoading) {
+            <div class="d-flex align-items-center gap-2 text-muted">
+              <div class="spinner-border spinner-border-sm" role="status"></div>
+              <span>Loading role data…</span>
             </div>
+          } @else {
+            @for (item of roleBreakdown; track item.role) {
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div style="min-width:160px" class="d-flex align-items-center gap-2">
+                  <span class="rounded-circle d-inline-block" style="width:10px;height:10px;flex-shrink:0" [style.background]="item.color"></span>
+                  <span class="small fw-medium">{{ item.display }}</span>
+                </div>
+                <div class="flex-grow-1 rounded" style="height:6px;background:#f1f5f9;overflow:hidden">
+                  <div class="rounded" style="height:100%;transition:width 0.4s ease"
+                       [style.width.%]="totalUsers > 0 ? (item.count / totalUsers) * 100 : 0"
+                       [style.background]="item.color"></div>
+                </div>
+                <span class="fw-bold small" style="min-width:24px;text-align:right">{{ item.count }}</span>
+              </div>
+            }
           }
-        }
+        </div>
       </div>
     </div>
 
     <!-- Quick actions -->
-    <div class="mp-card">
-      <div class="mp-card__header">
-        <h2 class="mp-card__title">
-          <span class="material-icons">flash_on</span>
-          Quick Actions
-        </h2>
-      </div>
-      <div class="mp-card__body">
-        <a routerLink="/admin/users" class="mp-action-tile">
-          <span class="material-icons mp-action-tile__icon" style="color:#2563eb">manage_accounts</span>
-          <div>
-            <p class="mp-action-tile__title">User Management</p>
-            <p class="mp-action-tile__desc">Add, edit, or remove users and assign roles</p>
-          </div>
-          <span class="material-icons mp-action-tile__arrow">chevron_right</span>
-        </a>
-        <div class="mp-action-tile mp-action-tile--disabled">
-          <span class="material-icons mp-action-tile__icon" style="color:#7c3aed">storage</span>
-          <div>
-            <p class="mp-action-tile__title">Master Data</p>
-            <p class="mp-action-tile__desc">Suppliers, facilities, and storage zones</p>
-          </div>
-          <span class="mp-coming-soon">Coming Soon</span>
+    <div class="col-lg-6">
+      <div class="data-card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-lightning-charge-fill text-warning"></i>
+          <span class="fw-semibold text-secondary small">QUICK ACTIONS</span>
         </div>
-        <div class="mp-action-tile mp-action-tile--disabled">
-          <span class="material-icons mp-action-tile__icon" style="color:#059669">monitor_heart</span>
-          <div>
-            <p class="mp-action-tile__title">System Health</p>
-            <p class="mp-action-tile__desc">Service status and performance metrics</p>
+        <div class="p-3">
+          <a routerLink="/admin/users" class="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none text-dark mb-2"
+             style="transition:background 0.15s" onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background=''">
+            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width:40px;height:40px;font-size:1.1rem;flex-shrink:0">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+              <p class="fw-semibold mb-0 small">User Management</p>
+              <p class="text-muted mb-0" style="font-size:0.75rem">Add, edit, or remove users and assign roles</p>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-2" style="opacity:0.6">
+            <div class="rounded-3 bg-purple bg-opacity-10 text-purple d-flex align-items-center justify-content-center" style="width:40px;height:40px;font-size:1.1rem;flex-shrink:0;background:rgba(111,66,193,0.1)">
+              <i class="bi bi-database-fill" style="color:#6f42c1"></i>
+            </div>
+            <div class="flex-grow-1">
+              <p class="fw-semibold mb-0 small">Master Data</p>
+              <p class="text-muted mb-0" style="font-size:0.75rem">Suppliers, facilities, and storage zones</p>
+            </div>
+            <span class="badge bg-success-subtle text-success" style="font-size:0.7rem">Coming Soon</span>
           </div>
-          <span class="mp-coming-soon">Coming Soon</span>
-        </div>
-        <div class="mp-action-tile mp-action-tile--disabled">
-          <span class="material-icons mp-action-tile__icon" style="color:#64748b">history</span>
-          <div>
-            <p class="mp-action-tile__title">Audit Logs</p>
-            <p class="mp-action-tile__desc">Review all system activity and changes</p>
+
+          <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-2" style="opacity:0.6">
+            <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;font-size:1.1rem;flex-shrink:0;background:rgba(5,150,105,0.1)">
+              <i class="bi bi-heart-pulse-fill" style="color:#059669"></i>
+            </div>
+            <div class="flex-grow-1">
+              <p class="fw-semibold mb-0 small">System Health</p>
+              <p class="text-muted mb-0" style="font-size:0.75rem">Service status and performance metrics</p>
+            </div>
+            <span class="badge bg-success-subtle text-success" style="font-size:0.7rem">Coming Soon</span>
           </div>
-          <span class="mp-coming-soon">Coming Soon</span>
+
+          <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="opacity:0.6">
+            <div class="rounded-3 bg-secondary bg-opacity-10 text-secondary d-flex align-items-center justify-content-center" style="width:40px;height:40px;font-size:1.1rem;flex-shrink:0">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="flex-grow-1">
+              <p class="fw-semibold mb-0 small">Audit Logs</p>
+              <p class="text-muted mb-0" style="font-size:0.75rem">Review all system activity and changes</p>
+            </div>
+            <span class="badge bg-success-subtle text-success" style="font-size:0.7rem">Coming Soon</span>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>

@@ -1,6 +1,7 @@
 using AuthService.DTOs;
 using AuthService.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared.Filters;
 
 namespace AuthService.Controllers;
@@ -40,6 +41,10 @@ public class AuthController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return Conflict(new { message = ex.Message });
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new { message = "A user with this email already exists." });
         }
     }
 

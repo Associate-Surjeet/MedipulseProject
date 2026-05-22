@@ -1,16 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { CurrentUser } from '../../services/auth/auth.models';
-import {
-  NavItem,
-  getRoleConfig,
-  RoleDashboardConfig,
-} from '../../shared/extensions/app.extensions';
+import { NavItem, getRoleConfig, RoleDashboardConfig } from '../../shared/extensions/app.extensions';
 
 @Component({
   selector: 'app-sidebar',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
 })

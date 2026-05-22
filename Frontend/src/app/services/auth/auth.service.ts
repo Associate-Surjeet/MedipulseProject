@@ -68,6 +68,10 @@ export class AuthService {
   }
 
   navigateAfterLogin(role: string): void {
+    if (role === 'Unassigned') {
+      this.router.navigate(['/pending-approval']);
+      return;
+    }
     this.router.navigate([getRoleDashboardRoute(role)]);
   }
 

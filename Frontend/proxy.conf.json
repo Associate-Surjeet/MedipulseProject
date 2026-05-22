@@ -1,6 +1,54 @@
 {
-  "/api": {
+  "/api/auth": {
     "target": "http://localhost:5001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/users": {
+    "target": "http://localhost:5001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/facilities": {
+    "target": "http://localhost:5002",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/storagezones": {
+    "target": "http://localhost:5002",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/suppliers": {
+    "target": "http://localhost:5004",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/purchaseorders": {
+    "target": "http://localhost:5004",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/receipts": {
+    "target": "http://localhost:5004",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/sensordevices": {
+    "target": "http://localhost:5006",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api/telemetry": {
+    "target": "http://localhost:5006",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

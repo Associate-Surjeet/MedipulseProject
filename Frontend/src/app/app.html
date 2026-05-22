@@ -1,11 +1,14 @@
 @if (showLayout) {
   <app-header></app-header>
-  <div class="mp-app-body">
-    <app-sidebar></app-sidebar>
-    <main class="mp-main-content">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+  <footer class="glass-footer text-white-50 text-center py-3">
+    <div class="container">
+      <i class="bi bi-heart-pulse-fill text-danger me-1"></i>
+      &copy; 2026 MediPulse &mdash; Clinical Logistics &amp; Inventory Intelligence Platform
+    </div>
+  </footer>
 } @else {
   <router-outlet></router-outlet>
 }

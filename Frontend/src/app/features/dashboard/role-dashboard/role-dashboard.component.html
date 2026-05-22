@@ -1,96 +1,78 @@
-<div class="mp-page">
+<div class="container-fluid py-4 px-4">
   @if (config && currentUser) {
-    <!-- Welcome banner -->
-    <div class="mp-welcome-banner" [style.border-left-color]="config.color">
-      <div class="mp-welcome-banner__icon" [style.background]="config.color + '18'">
-        <span class="material-icons" [style.color]="config.color">{{ config.icon }}</span>
-      </div>
-      <div class="mp-welcome-banner__text">
-        <h1 class="mp-welcome-banner__title">
-          {{ greeting }}, {{ currentUser.name }}
-        </h1>
-        <p class="mp-welcome-banner__subtitle">
-          <span class="mp-role-pill" [style.background]="config.color + '18'" [style.color]="config.color">
-            {{ roleDisplayName }}
-          </span>
-          &nbsp;{{ config.subtitle }}
-        </p>
-      </div>
-      <div class="mp-welcome-banner__date">
-        <span class="material-icons" style="font-size:16px; color:#94a3b8">calendar_today</span>
-        {{ currentDate | date:'EEEE, MMMM d, y' }}
+
+    <!-- Welcome Header -->
+    <div class="page-header mb-4" style="background: linear-gradient(135deg, #0a1628 0%, #0f2d5c 100%);">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h2 class="mb-1"><i class="bi bi-speedometer2 me-2"></i>{{ config.title }}</h2>
+          <p class="mb-0 opacity-75">
+            Welcome back, <strong>{{ currentUser.name }}</strong> &mdash;
+            <span class="badge bg-white bg-opacity-20 text-dark ms-1">{{ roleDisplayName }}</span>
+          </p>
+        </div>
+        <div class="text-white-50 small">
+          <i class="bi bi-calendar3 me-1"></i>{{ currentDate | date:'EEEE, MMMM d, y' }}
+        </div>
       </div>
     </div>
 
-    <!-- KPI cards -->
-    <div class="mp-kpi-grid">
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
       @for (card of config.kpiCards; track card.label) {
-        <div class="mp-kpi-card">
-          <div class="mp-kpi-card__icon" [style.background]="card.color + '18'">
-            <span class="material-icons" [style.color]="card.color">{{ card.icon }}</span>
-          </div>
-          <div class="mp-kpi-card__body">
-            <p class="mp-kpi-card__value">—</p>
-            <p class="mp-kpi-card__label">{{ card.label }}</p>
-            <p class="mp-kpi-card__desc">{{ card.description }}</p>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card" [style.--kpi-color]="card.color">
+            <div class="kpi-icon"><i class="bi bi-bar-chart-fill"></i></div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-label">{{ card.label }}</div>
           </div>
         </div>
       }
     </div>
 
-    <!-- Module access cards -->
-    <div class="mp-section-header">
-      <h2 class="mp-section-title">
-        <span class="material-icons">apps</span>
-        Your Assigned Modules
-      </h2>
-      <p class="mp-section-subtitle">
-        Access the modules assigned to your role
-      </p>
-    </div>
-
-    <div class="mp-module-grid">
-      @for (item of config.navItems; let i = $index; track item.label) {
-        <div
-          class="mp-module-card"
-          [style.--accent]="config.color"
-          [class.mp-module-card--primary]="i === 0"
-        >
-          <div class="mp-module-card__icon">
-            <span class="material-icons">{{ item.icon }}</span>
-          </div>
-          <div class="mp-module-card__body">
-            <h3 class="mp-module-card__title">{{ item.label }}</h3>
-            <p class="mp-module-card__desc">
-              @if (i === 0) {
-                Primary dashboard view
-              } @else {
-                Available module
-              }
-            </p>
-          </div>
-          <div class="mp-module-card__badge">
-            @if (i === 0) {
-              <span class="mp-module-badge mp-module-badge--active">Active</span>
-            } @else {
-              <span class="mp-module-badge mp-module-badge--soon">Coming Soon</span>
-            }
-          </div>
+    <!-- Module access -->
+    <div class="data-card">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-grid-3x3-gap-fill text-primary"></i>
+        <span class="fw-semibold text-secondary small">YOUR ASSIGNED MODULES</span>
+      </div>
+      <div class="p-4">
+        <div class="row g-3">
+          @for (item of config.navItems; let i = $index; track item.label) {
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm rounded-3 p-3 h-100" style="cursor:pointer; transition: transform 0.15s, box-shadow 0.15s;"
+                   onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)'"
+                   onmouseleave="this.style.transform=''; this.style.boxShadow=''">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="rounded-3 d-flex align-items-center justify-content-center text-white"
+                       [style.background]="config.color" style="width:42px;height:42px;font-size:1.2rem;">
+                    <i class="bi bi-grid"></i>
+                  </div>
+                  <div>
+                    <p class="fw-semibold mb-0 text-dark small">{{ item.label }}</p>
+                    <p class="text-muted mb-0" style="font-size:0.72rem;">
+                      @if (i === 0) { Primary module } @else { Available module }
+                    </p>
+                  </div>
+                  @if (i === 0) {
+                    <span class="badge bg-success ms-auto">Active</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
         </div>
-      }
-    </div>
-
-    <!-- Info panel -->
-    <div class="mp-info-panel">
-      <span class="material-icons mp-info-panel__icon">info</span>
-      <div>
-        <p class="mp-info-panel__title">Role-Based Access Control</p>
-        <p class="mp-info-panel__desc">
-          You are logged in as <strong>{{ roleDisplayName }}</strong>. Your dashboard
-          shows only the modules and data relevant to your role. Contact your
-          Administrator to request additional access.
-        </p>
       </div>
     </div>
+
+    <!-- Info -->
+    <div class="alert alert-info d-flex gap-3 align-items-start mt-4 rounded-3">
+      <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+      <div>
+        <strong>Role-Based Access Control</strong><br>
+        <small>You are logged in as <strong>{{ roleDisplayName }}</strong>. Your dashboard shows only the modules relevant to your role. Contact your Administrator to request additional access.</small>
+      </div>
+    </div>
+
   }
 </div>

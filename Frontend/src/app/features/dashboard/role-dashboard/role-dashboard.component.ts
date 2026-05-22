@@ -1,15 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth/auth.service';
 import { CurrentUser } from '../../../services/auth/auth.models';
-import {
-  getRoleConfig,
-  getRoleDisplayName,
-  RoleDashboardConfig,
-} from '../../../shared/extensions/app.extensions';
+import { getRoleConfig, getRoleDisplayName, RoleDashboardConfig } from '../../../shared/extensions/app.extensions';
 
 @Component({
   selector: 'app-role-dashboard',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './role-dashboard.component.html',
   styleUrl: './role-dashboard.component.css',
 })

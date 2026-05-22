@@ -63,7 +63,7 @@ public class AuthServiceImpl : IAuthService
 
     public async Task<UserDto> RegisterAsync(RegisterRequest request)
     {
-        if (await _db.Users.AnyAsync(u => u.Email == request.Email))
+        if (await _db.Users.AnyAsync(u => u.Email.ToLower() == request.Email.ToLower()))
             throw new InvalidOperationException("A user with this email already exists.");
 
         var user = new User
@@ -71,7 +71,7 @@ public class AuthServiceImpl : IAuthService
             Name     = request.Name,
             Email    = request.Email,
             Phone    = request.Phone,
-            Role     = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role,
+            Role     = "Unassigned",
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 

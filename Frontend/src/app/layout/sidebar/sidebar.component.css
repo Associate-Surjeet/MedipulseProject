@@ -1,11 +1,17 @@
+:host {
+  display: block;
+  height: 100%;
+  flex-shrink: 0;
+}
+
 .mp-sidebar {
   width: 256px;
-  min-height: calc(100vh - 64px);
+  height: 100%;
   background: #1e293b;
   display: flex;
   flex-direction: column;
   padding: 16px 0;
-  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .mp-sidebar__role-badge {
@@ -51,6 +57,7 @@
 .mp-sidebar__nav {
   flex: 1;
   padding: 0 8px;
+  overflow-y: auto;
 }
 
 .mp-sidebar__nav-item {
