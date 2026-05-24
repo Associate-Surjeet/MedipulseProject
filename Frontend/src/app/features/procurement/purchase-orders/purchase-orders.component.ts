@@ -106,7 +106,7 @@ export class PurchaseOrdersComponent implements OnInit {
     return m[s] ?? 'bg-secondary';
   }
   canEdit(o: PurchaseOrderDto) { return o.status === 'Draft'; }
-  canDelete(o: PurchaseOrderDto) { return o.status === 'Draft' || o.status === 'Cancelled'; }
+  canDelete(o: PurchaseOrderDto) { return true; }
   private today() { return new Date().toISOString().split('T')[0]; }
   private toDate(d: string) { return d.split('T')[0]; }
   private showSuccess(msg: string) { this.successMessage = msg; this.errorMessage = ''; setTimeout(() => this.successMessage = '', 3500); }

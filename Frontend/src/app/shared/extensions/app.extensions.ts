@@ -53,7 +53,6 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
       { label: 'Receipts & GRN',  icon: 'move_to_inbox',   route: '/procurement/receipts' },
       { label: 'Sensor Devices',  icon: 'sensors',          route: '/telemetry/sensors' },
       { label: 'Telemetry',       icon: 'thermostat',       route: '/telemetry/records' },
-      { label: 'Audit Logs',      icon: 'history',          route: '/dashboard' },
     ],
     kpiCards: [
       { label: 'Total Users', icon: 'people', description: 'All registered users', color: '#2563eb' },
@@ -67,13 +66,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     subtitle: 'Hospital-wide inventory and replenishment overview',
     icon: 'control_camera',
     color: '#2563eb',
-    navItems: [
-      { label: 'Control Tower', icon: 'control_camera', route: '/dashboard' },
-      { label: 'Inventory', icon: 'inventory_2', route: '/dashboard' },
-      { label: 'Replenishment', icon: 'autorenew', route: '/dashboard' },
-      { label: 'Expiry Tracking', icon: 'schedule', route: '/dashboard' },
-      { label: 'Exceptions', icon: 'warning_amber', route: '/dashboard' },
-    ],
+    navItems: [],
     kpiCards: [
       { label: 'Days of Stock', icon: 'event_available', description: 'Avg across facilities', color: '#2563eb' },
       { label: 'Expiry Risk Items', icon: 'schedule', description: 'Expiring in 30 days', color: '#f59e0b' },
@@ -86,13 +79,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     subtitle: 'Drug inventory, lot control, and regulatory reporting',
     icon: 'local_pharmacy',
     color: '#7c3aed',
-    navItems: [
-      { label: 'Pharmacy Dashboard', icon: 'local_pharmacy', route: '/dashboard' },
-      { label: 'Drug Inventory', icon: 'medication', route: '/dashboard' },
-      { label: 'Lot Control', icon: 'qr_code', route: '/dashboard' },
-      { label: 'Quality Holds', icon: 'verified_user', route: '/dashboard' },
-      { label: 'Regulatory Reports', icon: 'summarize', route: '/dashboard' },
-    ],
+    navItems: [],
     kpiCards: [
       { label: 'Drug SKUs', icon: 'medication', description: 'Total active drugs', color: '#7c3aed' },
       { label: 'Expiring Lots', icon: 'warning', description: 'Within 60 days', color: '#f59e0b' },
@@ -105,13 +92,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     subtitle: 'Medical device inventory, maintenance, and recalls',
     icon: 'medical_services',
     color: '#0891b2',
-    navItems: [
-      { label: 'Device Dashboard', icon: 'devices', route: '/dashboard' },
-      { label: 'Device Inventory', icon: 'medical_services', route: '/dashboard' },
-      { label: 'Maintenance', icon: 'build', route: '/dashboard' },
-      { label: 'Recalls', icon: 'report', route: '/dashboard' },
-      { label: 'Calibration', icon: 'tune', route: '/dashboard' },
-    ],
+    navItems: [],
     kpiCards: [
       { label: 'Total Devices', icon: 'devices', description: 'All tracked devices', color: '#0891b2' },
       { label: 'Due Maintenance', icon: 'build', description: 'Overdue / upcoming', color: '#f59e0b' },
@@ -125,11 +106,9 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     icon: 'shopping_cart',
     color: '#d97706',
     navItems: [
-      { label: 'Procurement Dashboard', icon: 'shopping_cart',  route: '/dashboard' },
-      { label: 'Purchase Orders',       icon: 'receipt_long',   route: '/procurement/purchase-orders' },
-      { label: 'Receipts & GRN',        icon: 'move_to_inbox',  route: '/procurement/receipts' },
-      { label: 'Suppliers',             icon: 'business',       route: '/procurement/suppliers' },
-      { label: 'ASN Tracking',          icon: 'local_shipping', route: '/dashboard' },
+      { label: 'Purchase Orders', icon: 'receipt_long',  route: '/procurement/purchase-orders' },
+      { label: 'Receipts',        icon: 'move_to_inbox', route: '/procurement/receipts' },
+      { label: 'Suppliers',       icon: 'business',      route: '/procurement/suppliers' },
     ],
     kpiCards: [
       { label: 'Open POs', icon: 'receipt_long', description: 'Pending purchase orders', color: '#d97706' },
@@ -144,11 +123,8 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     icon: 'ac_unit',
     color: '#0284c7',
     navItems: [
-      { label: 'Cold Chain Dashboard', icon: 'ac_unit',          route: '/dashboard' },
-      { label: 'Active Shipments',     icon: 'local_shipping',   route: '/dashboard' },
-      { label: 'Sensor Devices',       icon: 'sensors',          route: '/telemetry/sensors' },
-      { label: 'Telemetry Records',    icon: 'thermostat',       route: '/telemetry/records' },
-      { label: 'Corrective Actions',   icon: 'healing',          route: '/dashboard' },
+      { label: 'Sensor Devices',    icon: 'sensors',    route: '/telemetry/sensors' },
+      { label: 'Telemetry Records', icon: 'thermostat', route: '/telemetry/records' },
     ],
     kpiCards: [
       { label: 'Active Shipments', icon: 'local_shipping', description: 'In-transit cold chain', color: '#0284c7' },
@@ -162,13 +138,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     subtitle: 'Local stock view, requisitions, and consumption tracking',
     icon: 'local_hospital',
     color: '#059669',
-    navItems: [
-      { label: 'Ward Dashboard', icon: 'local_hospital', route: '/dashboard' },
-      { label: 'Local Stock', icon: 'inventory', route: '/dashboard' },
-      { label: 'Requisitions', icon: 'add_shopping_cart', route: '/dashboard' },
-      { label: 'Consumption Log', icon: 'list_alt', route: '/dashboard' },
-      { label: 'Replenishment ETA', icon: 'access_time', route: '/dashboard' },
-    ],
+    navItems: [],
     kpiCards: [
       { label: 'Ward Stock Items', icon: 'inventory', description: 'Items available', color: '#059669' },
       { label: 'Low Stock Alerts', icon: 'warning', description: 'Below minimum', color: '#f59e0b' },
@@ -181,12 +151,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     subtitle: 'Audit trails, recall actions, and regulatory exports',
     icon: 'policy',
     color: '#64748b',
-    navItems: [
-      { label: 'Compliance Dashboard', icon: 'policy', route: '/dashboard' },
-      { label: 'Audit Trail', icon: 'fact_check', route: '/dashboard' },
-      { label: 'Recall Actions', icon: 'report_problem', route: '/dashboard' },
-      { label: 'Regulatory Exports', icon: 'file_download', route: '/dashboard' },
-    ],
+    navItems: [],
     kpiCards: [
       { label: 'Audit Events', icon: 'fact_check', description: 'Last 30 days', color: '#64748b' },
       { label: 'Open Recalls', icon: 'report_problem', description: 'Pending resolution', color: '#dc2626' },

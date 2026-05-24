@@ -1,77 +1,108 @@
-<div class="container-fluid py-4 px-4">
+<div class="mp-page">
   @if (config && currentUser) {
 
-    <!-- Welcome Header -->
-    <div class="page-header mb-4" style="background: linear-gradient(135deg, #0a1628 0%, #0f2d5c 100%);">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-          <h2 class="mb-1"><i class="bi bi-speedometer2 me-2"></i>{{ config.title }}</h2>
-          <p class="mb-0 opacity-75">
-            Welcome back, <strong>{{ currentUser.name }}</strong> &mdash;
-            <span class="badge bg-white bg-opacity-20 text-dark ms-1">{{ roleDisplayName }}</span>
-          </p>
-        </div>
-        <div class="text-white-50 small">
-          <i class="bi bi-calendar3 me-1"></i>{{ currentDate | date:'EEEE, MMMM d, y' }}
-        </div>
+    <!-- Hero -->
+    <div class="mp-hero">
+      <div>
+        <div class="mp-crumb">{{ greeting }}, <b>{{ currentUser.name }}</b></div>
+        <h1 class="mp-h1">{{ config.title }}</h1>
+        <p class="mp-sub">Here is what you have access to today &mdash; {{ currentDate | date:'EEEE, MMMM d, y' }}.</p>
       </div>
+      <span class="mp-role-pill" style="font-size:12px;padding:6px 14px">
+        <i class="bi bi-person-badge me-1"></i>{{ roleDisplayName }}
+      </span>
     </div>
 
-    <!-- KPI Cards -->
-    <div class="row g-3 mb-4">
-      @for (card of config.kpiCards; track card.label) {
-        <div class="col-6 col-md-3">
-          <div class="kpi-card" [style.--kpi-color]="card.color">
-            <div class="kpi-icon"><i class="bi bi-bar-chart-fill"></i></div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-label">{{ card.label }}</div>
-          </div>
-        </div>
-      }
-    </div>
+    <div class="mp-content">
 
-    <!-- Module access -->
-    <div class="data-card">
-      <div class="card-header d-flex align-items-center gap-2">
-        <i class="bi bi-grid-3x3-gap-fill text-primary"></i>
-        <span class="fw-semibold text-secondary small">YOUR ASSIGNED MODULES</span>
-      </div>
-      <div class="p-4">
-        <div class="row g-3">
-          @for (item of config.navItems; let i = $index; track item.label) {
-            <div class="col-md-4">
-              <div class="card border-0 shadow-sm rounded-3 p-3 h-100" style="cursor:pointer; transition: transform 0.15s, box-shadow 0.15s;"
-                   onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)'"
-                   onmouseleave="this.style.transform=''; this.style.boxShadow=''">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="rounded-3 d-flex align-items-center justify-content-center text-white"
-                       [style.background]="config.color" style="width:42px;height:42px;font-size:1.2rem;">
-                    <i class="bi bi-grid"></i>
-                  </div>
-                  <div>
-                    <p class="fw-semibold mb-0 text-dark small">{{ item.label }}</p>
-                    <p class="text-muted mb-0" style="font-size:0.72rem;">
-                      @if (i === 0) { Primary module } @else { Available module }
-                    </p>
-                  </div>
-                  @if (i === 0) {
-                    <span class="badge bg-success ms-auto">Active</span>
-                  }
-                </div>
-              </div>
+      <!-- KPI tiles -->
+      @if (isLoading) {
+        <div class="mp-kpis">
+          @for (_ of [1,2,3,4]; track $index) {
+            <div class="mp-kpi">
+              <div class="mp-kpi-label">Loading…</div>
+              <div class="mp-kpi-value" style="opacity:0.15">—</div>
             </div>
           }
         </div>
-      </div>
-    </div>
+      } @else if (kpis.length > 0) {
+        <div [class]="kpisColClass">
+          @for (k of kpis; track k.label) {
+            <div class="mp-kpi">
+              <div class="mp-kpi-label">{{ k.label }}</div>
+              <div class="mp-kpi-value">{{ k.value }}</div>
+              <div class="mp-kpi-foot">{{ k.foot }}</div>
+            </div>
+          }
+        </div>
+      }
 
-    <!-- Info -->
-    <div class="alert alert-info d-flex gap-3 align-items-start mt-4 rounded-3">
-      <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
-      <div>
-        <strong>Role-Based Access Control</strong><br>
-        <small>You are logged in as <strong>{{ roleDisplayName }}</strong>. Your dashboard shows only the modules relevant to your role. Contact your Administrator to request additional access.</small>
+      <!-- Quick links -->
+      @if (config.navItems.length > 0) {
+        <div class="mp-card">
+          <div class="mp-card-header">
+            <div>
+              <div class="mp-eyebrow">Quick links</div>
+              <div class="mp-card-title">Where you can go</div>
+            </div>
+          </div>
+          <div class="mp-body-pad">
+            <div class="row g-3">
+              @for (item of config.navItems; let i = $index; track item.label) {
+                <div class="col-md-4">
+                  <div style="border:1px solid #ECE9E2;border-radius:8px;padding:16px 18px;background:#FFFFFF;transition:border-color 0.14s;cursor:pointer"
+                       onmouseenter="this.style.borderColor='#14202C';this.style.background='#F7F4EC'"
+                       onmouseleave="this.style.borderColor='#ECE9E2';this.style.background='#FFFFFF'"
+                       (click)="navigate(item.route)">
+                    <div class="d-flex align-items-center gap-3">
+                      <div style="width:36px;height:36px;border-radius:6px;background:#F4F1E9;display:flex;align-items:center;justify-content:center;font-size:16px;color:#14202C;flex-shrink:0">
+                        <i class="bi bi-grid"></i>
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:13px;font-weight:500;color:#14202C;margin-bottom:2px">{{ item.label }}</div>
+                        <div style="font-size:11px;color:#6B6A66">
+                          @if (i === 0) { Start here } @else { Also available }
+                        </div>
+                      </div>
+                      @if (i === 0) {
+                        <span class="mp-tag mp-tag-live">Active</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      } @else if (!isLoading) {
+        <!-- No pages built yet -->
+        <div class="mp-card">
+          <div class="mp-card-header">
+            <div>
+              <div class="mp-eyebrow">Quick links</div>
+              <div class="mp-card-title">Where you can go</div>
+            </div>
+          </div>
+          <div class="mp-card-body">
+            <div class="empty-state">
+              <i class="bi bi-hourglass-split"></i>
+              <p class="fw-semibold mb-1">Nothing here yet</p>
+              <p class="small">The pages for your role are still being set up. Check back soon.</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Info note -->
+      <div style="background:#EBF3FC;border:1px solid #C5DCF5;border-radius:8px;padding:14px 18px;font-size:13px;color:#1D5FA8;display:flex;gap:10px;align-items:flex-start">
+        <i class="bi bi-info-circle-fill" style="margin-top:1px;flex-shrink:0"></i>
+        <div>
+          You are signed in as <strong>{{ roleDisplayName }}</strong>.
+          You can only see the pages that match your role.
+          If you need access to something else, ask your administrator.
+        </div>
       </div>
+
     </div>
 
   }

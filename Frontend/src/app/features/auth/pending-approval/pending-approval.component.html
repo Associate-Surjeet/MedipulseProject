@@ -1,55 +1,65 @@
-<div class="d-flex align-items-center justify-content-center min-vh-100" style="background:#f0f4f8;">
-  <div class="text-center" style="max-width:480px; padding:2rem;">
+<div style="min-height:100vh;background:#FBFAF7;display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div style="width:100%;max-width:460px">
 
-    <div class="mb-4">
-      <i class="bi bi-heart-pulse-fill" style="font-size:3rem;background:linear-gradient(135deg,#ef4444,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;"></i>
-      <h2 class="fw-bold mt-2" style="color:#0f2d5c;">MediPulse</h2>
+    <!-- Brand -->
+    <div class="text-center mb-4">
+      <svg width="44" height="44" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+        <rect width="36" height="36" rx="8" fill="#14202C"/>
+        <path d="M 9 25 L 9 11 L 14 19 L 18 13" stroke="#FBFAF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M 18 13 L 21 22 L 24 16 L 27 19" stroke="#D4A857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="27" cy="19" r="1.6" fill="#D4A857"/>
+      </svg>
+      <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:500;color:#14202C;margin-top:10px">MediPulse</div>
     </div>
 
-    <div class="card border-0 shadow-lg rounded-4 p-4">
-      <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3 mx-auto mb-3">
-        <i class="bi bi-hourglass-split text-warning fs-2"></i>
-      </div>
+    <!-- Card -->
+    <div style="background:#FFFFFF;border:1px solid #ECE9E2;border-radius:8px;padding:2.5rem">
 
-      <h4 class="fw-bold text-dark mb-2">Account Pending Approval</h4>
-      <p class="text-muted mb-4">
-        Your account has been created successfully. An administrator will review and assign your role shortly. You'll have full access once approved.
-      </p>
+      <div class="text-center mb-4">
+        <div style="width:56px;height:56px;border-radius:8px;background:#FDF4E7;border:1px solid #EDCA80;display:inline-flex;align-items:center;justify-content:center;font-size:1.6rem;color:#B07A1A;margin-bottom:16px">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <h4 style="font-family:'Fraunces',serif;font-size:1.25rem;font-weight:500;color:#14202C;margin-bottom:6px">Account pending approval</h4>
+        <p style="font-size:13px;color:#6B6A66;line-height:1.55;margin:0">
+          Your account has been created successfully. An administrator will review and assign your role shortly.
+        </p>
+      </div>
 
       <!-- Progress steps -->
-      <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
-        <div class="d-flex flex-column align-items-center">
-          <div class="rounded-circle d-flex align-items-center justify-content-center bg-success text-white" style="width:36px;height:36px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:34px;height:34px;border-radius:50%;background:#4A6B3A;border:1px solid #D7E0CE;display:flex;align-items:center;justify-content:center;color:white;font-size:14px">
             <i class="bi bi-check-lg"></i>
           </div>
-          <small class="text-success fw-semibold mt-1" style="font-size:0.7rem;">Registered</small>
+          <small style="color:#4A6B3A;font-size:10px;font-weight:500;margin-top:5px;letter-spacing:0.5px;text-transform:uppercase">Registered</small>
         </div>
-        <div class="flex-grow-1" style="height:2px;background:#e2e8f0;max-width:60px;"></div>
-        <div class="d-flex flex-column align-items-center">
-          <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning text-white" style="width:36px;height:36px;">
+        <div style="height:1px;background:#ECE9E2;width:56px;margin-bottom:18px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:34px;height:34px;border-radius:50%;background:#FDF4E7;border:1px solid #EDCA80;display:flex;align-items:center;justify-content:center;color:#B07A1A;font-size:14px">
             <i class="bi bi-person-check"></i>
           </div>
-          <small class="text-warning fw-semibold mt-1" style="font-size:0.7rem;">Under Review</small>
+          <small style="color:#B07A1A;font-size:10px;font-weight:500;margin-top:5px;letter-spacing:0.5px;text-transform:uppercase">Under review</small>
         </div>
-        <div class="flex-grow-1" style="height:2px;background:#e2e8f0;max-width:60px;"></div>
-        <div class="d-flex flex-column align-items-center">
-          <div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style="width:36px;height:36px;">
+        <div style="height:1px;background:#ECE9E2;width:56px;margin-bottom:18px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:34px;height:34px;border-radius:50%;background:#F4F1E9;border:1px solid #ECE9E2;display:flex;align-items:center;justify-content:center;color:#9A9892;font-size:14px">
             <i class="bi bi-unlock"></i>
           </div>
-          <small class="text-muted fw-semibold mt-1" style="font-size:0.7rem;">Full Access</small>
+          <small style="color:#9A9892;font-size:10px;font-weight:500;margin-top:5px;letter-spacing:0.5px;text-transform:uppercase">Full access</small>
         </div>
       </div>
 
-      <div class="alert alert-info rounded-3 py-2 small text-start mb-4">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        If you need urgent access, please contact your system administrator directly.
+      <!-- Info note -->
+      <div style="background:#EBF3FC;border:1px solid #C5DCF5;border-radius:6px;padding:12px 14px;font-size:13px;color:#1D5FA8;margin-bottom:20px;display:flex;gap:8px;align-items:flex-start">
+        <i class="bi bi-info-circle-fill" style="margin-top:1px;flex-shrink:0"></i>
+        <span>If you need urgent access, please contact your system administrator directly.</span>
       </div>
 
-      <button class="btn btn-outline-danger w-100" (click)="logout()">
-        <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+      <button class="btn btn-secondary w-100" (click)="logout()">
+        <i class="bi bi-box-arrow-right me-2"></i>Sign out
       </button>
     </div>
 
-    <p class="text-muted small mt-4">&copy; 2026 MediPulse &mdash; Clinical Logistics Platform</p>
+    <p class="text-center small mt-4" style="color:#9A9892">&copy; 2026 MediPulse &mdash; Clinical Logistics Platform</p>
   </div>
 </div>

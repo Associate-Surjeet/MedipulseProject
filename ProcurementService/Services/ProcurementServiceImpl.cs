@@ -55,15 +55,15 @@ public class ProcurementServiceImpl : IProcurementService
     {
         var supplier = await _db.Suppliers
             .Include(s => s.PurchaseOrders)
+                .ThenInclude(po => po.Receipts)
             .FirstOrDefaultAsync(s => s.SupplierId == id);
 
         if (supplier == null) return false;
 
-        if (supplier.PurchaseOrders.Any())
-            throw new InvalidOperationException(
-                $"Supplier {id} cannot be deleted: it has {supplier.PurchaseOrders.Count} " +
-                "associated purchase order(s). Remove or reassign those orders first.");
+        foreach (var po in supplier.PurchaseOrders)
+            _db.Receipts.RemoveRange(po.Receipts);
 
+        _db.PurchaseOrders.RemoveRange(supplier.PurchaseOrders);
         _db.Suppliers.Remove(supplier);
         await _db.SaveChangesAsync();
         return true;
@@ -178,10 +178,6 @@ public class ProcurementServiceImpl : IProcurementService
             .FirstOrDefaultAsync(p => p.PoId == id);
 
         if (po == null) return false;
-
-        if (po.Status != "Draft" && po.Status != "Cancelled")
-            throw new InvalidOperationException(
-                $"Purchase order {id} cannot be deleted in '{po.Status}' status. Only Draft or Cancelled orders can be deleted.");
 
         _db.Receipts.RemoveRange(po.Receipts);
         _db.PurchaseOrders.Remove(po);

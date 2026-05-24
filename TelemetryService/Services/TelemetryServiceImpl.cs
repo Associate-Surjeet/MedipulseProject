@@ -61,11 +61,7 @@ public class TelemetryServiceImpl : ITelemetryService
 
         if (sensor == null) return false;
 
-        if (sensor.TelemetryRecords.Any())
-            throw new InvalidOperationException(
-                $"Sensor {id} cannot be deleted: it has {sensor.TelemetryRecords.Count} " +
-                "associated telemetry record(s). Delete those records first.");
-
+        _db.TelemetryRecords.RemoveRange(sensor.TelemetryRecords);
         _db.SensorDevices.Remove(sensor);
         await _db.SaveChangesAsync();
         return true;

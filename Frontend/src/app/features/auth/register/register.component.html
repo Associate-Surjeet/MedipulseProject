@@ -1,100 +1,134 @@
 <div class="auth-page">
-  <div class="auth-left d-none d-lg-flex">
+
+  <!-- Left panel -->
+  <div class="auth-left">
     <div class="auth-brand-panel">
-      <div class="mb-4"><i class="bi bi-heart-pulse-fill auth-brand-icon"></i></div>
-      <h1 class="auth-brand-title">MediPulse</h1>
+      <div class="auth-brand-logo">
+        <svg width="40" height="40" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="8" fill="rgba(255,255,255,0.10)"/>
+          <path d="M 9 25 L 9 11 L 14 19 L 18 13" stroke="#FBFAF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M 18 13 L 21 22 L 24 16 L 27 19" stroke="#D4A857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="27" cy="19" r="1.6" fill="#D4A857"/>
+        </svg>
+        <h1 class="auth-brand-title">MediPulse</h1>
+      </div>
       <p class="auth-brand-subtitle">Clinical Logistics &amp; Inventory Intelligence Platform</p>
-      <div class="auth-features mt-5">
-        <div class="auth-feature-item"><i class="bi bi-shield-check-fill text-info me-3"></i><span>Role-Based Secure Access</span></div>
-        <div class="auth-feature-item"><i class="bi bi-bar-chart-line-fill text-success me-3"></i><span>Real-Time Inventory Intelligence</span></div>
-        <div class="auth-feature-item"><i class="bi bi-thermometer-half text-warning me-3"></i><span>Cold Chain Monitoring</span></div>
-        <div class="auth-feature-item"><i class="bi bi-bell-fill text-danger me-3"></i><span>Expiry &amp; Stockout Alerts</span></div>
+      <div class="auth-features">
+        <div class="auth-feature-item">
+          <i class="bi bi-shield-check-fill" style="color:#D4A857;font-size:15px"></i>
+          <span>Role-based secure access</span>
+        </div>
+        <div class="auth-feature-item">
+          <i class="bi bi-bar-chart-line-fill" style="color:#D4A857;font-size:15px"></i>
+          <span>Real-time inventory intelligence</span>
+        </div>
+        <div class="auth-feature-item">
+          <i class="bi bi-thermometer-half" style="color:#D4A857;font-size:15px"></i>
+          <span>Cold chain monitoring</span>
+        </div>
+        <div class="auth-feature-item">
+          <i class="bi bi-bell-fill" style="color:#D4A857;font-size:15px"></i>
+          <span>Expiry &amp; stockout alerts</span>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Right panel -->
   <div class="auth-right">
     <div class="auth-form-wrapper">
+
+      <!-- Mobile brand -->
       <div class="text-center mb-4 d-lg-none">
-        <i class="bi bi-heart-pulse-fill text-danger fs-1"></i>
-        <h4 class="fw-bold mt-2" style="color:#0f2d5c;">MediPulse</h4>
+        <svg width="40" height="40" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="8" fill="#14202C"/>
+          <path d="M 9 25 L 9 11 L 14 19 L 18 13" stroke="#FBFAF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M 18 13 L 21 22 L 24 16 L 27 19" stroke="#D4A857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="27" cy="19" r="1.6" fill="#D4A857"/>
+        </svg>
+        <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:500;color:#14202C;margin-top:8px">MediPulse</div>
       </div>
 
       <div class="auth-form-card">
         <div class="text-center mb-4">
-          <div class="auth-icon-circle mx-auto mb-3"><i class="bi bi-person-plus-fill"></i></div>
-          <h4 class="fw-bold text-dark mb-1">Create Account</h4>
-          <p class="text-muted small mb-0">Register for MediPulse access</p>
+          <div class="auth-icon-circle mx-auto mb-3">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <h4 style="font-family:'Fraunces',serif;font-weight:500;font-size:1.3rem;color:#14202C;margin-bottom:4px">Create account</h4>
+          <p style="font-size:13px;color:#6B6A66;margin:0">Register for MediPulse access</p>
         </div>
 
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
           @if (errorMessage) {
-            <div class="alert alert-danger rounded-3 py-2 small mb-3">
-              <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+            <div class="mp-toast mp-toast-danger mb-3">
+              <i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}
             </div>
           }
 
           <div class="mb-3">
-            <label class="form-label fw-semibold text-dark small">Full Name</label>
+            <label class="form-label">Full name</label>
             <div class="input-group">
               <span class="input-group-text auth-input-icon"><i class="bi bi-person-fill"></i></span>
-              <input type="text" class="form-control auth-input" formControlName="name" placeholder="Enter your full name" />
+              <input type="text" class="form-control auth-input" formControlName="name"
+                     placeholder="Dr. Jane Smith" />
             </div>
-            @if (nameCtrl.touched && nameCtrl.hasError('required')) {
-              <div class="text-danger small mt-1">Full name is required.</div>
+            @if (nameError) {
+              <div class="text-danger small mt-1">{{ nameError }}</div>
             }
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold text-dark small">Email Address</label>
+            <label class="form-label">Email address</label>
             <div class="input-group">
               <span class="input-group-text auth-input-icon"><i class="bi bi-envelope-fill"></i></span>
-              <input type="email" class="form-control auth-input" formControlName="email" placeholder="Enter your email" />
+              <input type="email" class="form-control auth-input" formControlName="email"
+                     placeholder="your@email.com" />
             </div>
-            @if (emailCtrl.touched && emailCtrl.hasError('required')) {
-              <div class="text-danger small mt-1">Email is required.</div>
-            }
-            @if (emailCtrl.touched && emailCtrl.hasError('email')) {
-              <div class="text-danger small mt-1">Enter a valid email address.</div>
+            @if (emailError) {
+              <div class="text-danger small mt-1">{{ emailError }}</div>
             }
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold text-dark small">Phone Number</label>
+            <label class="form-label">Phone number <span style="color:#9A9892;font-weight:400">(optional)</span></label>
             <div class="input-group">
               <span class="input-group-text auth-input-icon"><i class="bi bi-telephone-fill"></i></span>
-              <input type="tel" class="form-control auth-input" formControlName="phone" placeholder="Enter your phone number" />
+              <input type="tel" class="form-control auth-input" formControlName="phone"
+                     placeholder="10-digit number" />
             </div>
+            @if (phoneError) {
+              <div class="text-danger small mt-1">{{ phoneError }}</div>
+            }
           </div>
 
           <div class="mb-4">
-            <label class="form-label fw-semibold text-dark small">Password</label>
+            <label class="form-label">Password</label>
             <div class="input-group">
               <span class="input-group-text auth-input-icon"><i class="bi bi-lock-fill"></i></span>
-              <input type="password" class="form-control auth-input" formControlName="password" placeholder="Min 8 chars, upper, lower, digit, symbol" />
+              <input type="password" class="form-control auth-input" formControlName="password"
+                     placeholder="Min 8 chars · upper · lower · digit · symbol" />
             </div>
-            @if (passwordCtrl.touched && passwordCtrl.hasError('required')) {
-              <div class="text-danger small mt-1">Password is required.</div>
-            }
-            @if (passwordCtrl.touched && passwordCtrl.hasError('minlength')) {
-              <div class="text-danger small mt-1">Password must be at least 8 characters.</div>
+            @if (passwordError) {
+              <div class="text-danger small mt-1">{{ passwordError }}</div>
             }
           </div>
 
-          <button type="submit" class="btn auth-submit-btn w-100 py-2 fw-bold" [disabled]="isSubmitting">
-            @if (isSubmitting) { <span class="spinner-border spinner-border-sm me-2"></span> }
-            @else { <i class="bi bi-person-check-fill me-2"></i> }
-            {{ isSubmitting ? 'Creating Account…' : 'Create Account' }}
+          <button type="submit" class="btn auth-submit-btn w-100 py-2" [disabled]="isSubmitting">
+            @if (isSubmitting) { <span class="spinner-border spinner-border-sm"></span> }
+            @else { <i class="bi bi-person-check-fill"></i> }
+            {{ isSubmitting ? 'Creating account…' : 'Create account' }}
           </button>
         </form>
 
-        <hr class="my-4 text-muted">
-        <p class="text-center text-muted small mb-0">
+        <hr style="border-color:#ECE9E2;margin:1.5rem 0">
+        <p class="text-center small mb-0" style="color:#6B6A66">
           Already have an account?
-          <a routerLink="/login" class="fw-semibold text-decoration-none auth-link">Sign in</a>
+          <a routerLink="/login" class="auth-link ms-1">Sign in</a>
         </p>
       </div>
-      <p class="text-center text-muted small mt-4">&copy; 2026 MediPulse &mdash; Clinical Logistics Platform</p>
+
+      <p class="text-center small mt-4" style="color:#9A9892">&copy; 2026 MediPulse &mdash; Clinical Logistics Platform</p>
     </div>
   </div>
+
 </div>
