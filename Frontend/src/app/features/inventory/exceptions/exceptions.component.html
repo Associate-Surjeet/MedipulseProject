@@ -1,0 +1,253 @@
+<div class="mp-page">
+  <div class="mp-hero">
+    <div>
+      <div class="mp-crumb">Dashboard / Inventory / <b>Exceptions &amp; Recalls</b></div>
+      <h1 class="mp-h1">Exceptions &amp; Recall Management</h1>
+      <p class="mp-sub">Track stockouts, expiry alerts, excursions and active recall actions.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <div class="d-flex gap-1 align-items-center">
+        <select class="form-select form-select-sm" style="width:190px" [(ngModel)]="detectFacilityId">
+          <option value="">— Select facility —</option>
+          @for (f of facilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
+        </select>
+        <button class="mp-btn mp-btn-secondary" (click)="detect()" [disabled]="isDetecting">
+          @if (isDetecting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+          @else { <i class="bi bi-search me-1"></i> }
+          Auto-detect
+        </button>
+      </div>
+      <button class="mp-btn" (click)="openAddExc()"><i class="bi bi-plus-lg"></i>Add exception</button>
+    </div>
+  </div>
+
+  <div class="mp-content">
+    @if (successMessage) {
+      <div class="mp-toast mp-toast-success"><i class="bi bi-check-circle-fill"></i>{{ successMessage }}</div>
+    }
+    @if (errorMessage && !showExcModal && !showStatusModal && !showRecallModal) {
+      <div class="mp-toast mp-toast-danger"><i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}</div>
+    }
+
+    <!-- KPIs -->
+    <div class="mp-kpis">
+      <div class="mp-kpi"><div class="mp-kpi-label">Total</div><div class="mp-kpi-value">{{ exceptions.length }}</div><div class="mp-kpi-foot">All exceptions</div></div>
+      <div class="mp-kpi" style="--kpi-accent:#dc2626"><div class="mp-kpi-label">Open</div><div class="mp-kpi-value" style="color:#dc2626">{{ openCount }}</div><div class="mp-kpi-foot">Needs action</div></div>
+      <div class="mp-kpi" style="--kpi-accent:#f59e0b"><div class="mp-kpi-label">In Progress</div><div class="mp-kpi-value" style="color:#f59e0b">{{ inProgressCount }}</div><div class="mp-kpi-foot">Being resolved</div></div>
+      <div class="mp-kpi" style="--kpi-accent:#dc2626"><div class="mp-kpi-label">High Severity</div><div class="mp-kpi-value" style="color:#dc2626">{{ highCount }}</div><div class="mp-kpi-foot">Critical events</div></div>
+    </div>
+
+    <div class="d-flex gap-3" style="align-items:flex-start">
+      <!-- Exceptions list -->
+      <div style="flex:1;min-width:0">
+        <div class="mp-card">
+          <div class="mp-card-header">
+            <div><div class="mp-eyebrow">Events</div><div class="mp-card-title">All exceptions <span class="mp-tag mp-tag-gray ms-2" style="font-size:11px;vertical-align:middle">{{ filtered.length }}</span></div></div>
+            <div class="mp-card-actions" style="gap:8px">
+              <select class="form-select form-select-sm" style="width:120px" [(ngModel)]="typeFilter" (change)="applyFilter()">
+                <option value="">All types</option>
+                @for (t of excTypes; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+              <select class="form-select form-select-sm" style="width:120px" [(ngModel)]="statusFilter" (change)="applyFilter()">
+                <option value="">All status</option>
+                @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+              </select>
+              <input type="text" class="search-box" style="width:180px" placeholder="Search…" [(ngModel)]="search" (input)="applyFilter()" />
+            </div>
+          </div>
+          <div class="mp-card-body">
+            @if (isLoading) {
+              <div class="empty-state"><div class="spinner-border" role="status"></div></div>
+            } @else if (filtered.length === 0) {
+              <div class="empty-state"><i class="bi bi-shield-check"></i><p class="fw-semibold mb-1">No exceptions found</p></div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table">
+                  <thead><tr>
+                    <th>Type</th><th>Item</th><th>Facility</th><th>Severity</th><th>Status</th><th>Detected</th><th>Actions</th><th style="width:120px">Manage</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (e of filtered; track e.exceptionId) {
+                      <tr [class.table-danger]="e.severity==='High' && e.status==='Open'">
+                        <td><span class="badge-status bg-primary">{{ e.type }}</span></td>
+                        <td>
+                          <div class="fw-semibold">{{ e.itemName ?? '—' }}</div>
+                          @if (e.lotId) { <div class="text-muted" style="font-size:11px">Lot: {{ e.lotId }}</div> }
+                        </td>
+                        <td class="text-muted">{{ e.facilityId ?? '—' }}</td>
+                        <td><span class="badge-status" [ngClass]="severityClass(e.severity)">{{ e.severity }}</span></td>
+                        <td><span class="badge-status" [ngClass]="statusClass(e.status)">{{ e.status }}</span></td>
+                        <td class="text-muted" style="font-size:12px">{{ e.detectedDate | date:'dd MMM yyyy' }}</td>
+                        <td class="text-muted">{{ e.actions.length }} action(s)</td>
+                        <td>
+                          <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-primary" title="Recall Actions" (click)="openRecallPanel(e)"><i class="bi bi-list-check"></i></button>
+                            <button class="btn btn-sm btn-outline-warning" title="Update Status" (click)="openStatus(e)"><i class="bi bi-arrow-repeat"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Recall actions side panel -->
+      @if (selectedExc) {
+        <div class="mp-card" style="width:360px;flex-shrink:0">
+          <div class="mp-card-header">
+            <div>
+              <div class="mp-eyebrow">Recall Actions</div>
+              <div class="mp-card-title" style="font-size:14px">{{ selectedExc.type }} — {{ selectedExc.itemName ?? 'Exception #' + selectedExc.exceptionId }}</div>
+            </div>
+            <div class="mp-card-actions">
+              <button class="btn btn-sm btn-primary" (click)="openAddRecall()"><i class="bi bi-plus-lg"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="closeRecallPanel()"><i class="bi bi-x-lg"></i></button>
+            </div>
+          </div>
+          <div class="mp-card-body" style="max-height:480px;overflow-y:auto">
+            @if (selectedExc.actions.length === 0) {
+              <div class="empty-state" style="padding:2rem 1rem"><i class="bi bi-list-check"></i><p class="small mt-2">No recall actions yet.</p></div>
+            } @else {
+              @for (a of selectedExc.actions; track a.recallActionId) {
+                <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div style="font-size:13px;font-weight:600">{{ a.actionDescription }}</div>
+                    <span class="badge-status" [ngClass]="{ 'bg-warning': a.status==='Pending', 'bg-primary': a.status==='InProgress', 'bg-success': a.status==='Completed', 'bg-secondary': a.status==='Cancelled' }">{{ a.status }}</span>
+                  </div>
+                  <div class="text-muted mt-1" style="font-size:12px">
+                    <i class="bi bi-person me-1"></i>{{ a.ownerId }}
+                    &nbsp;·&nbsp;<i class="bi bi-calendar me-1"></i>Due {{ a.dueDate | date:'dd MMM yyyy' }}
+                  </div>
+                  <div class="d-flex gap-1 mt-2">
+                    <button class="btn btn-xs btn-outline-warning" style="font-size:11px;padding:2px 8px" (click)="openEditRecall(a)"><i class="bi bi-pencil-fill"></i></button>
+                    <button class="btn btn-xs btn-outline-danger" style="font-size:11px;padding:2px 8px" (click)="deleteRecall(a.recallActionId)"><i class="bi bi-trash-fill"></i></button>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Add Exception Modal -->
+@if (showExcModal) {
+  <div class="modal d-block" style="background:rgba(20,32,44,0.55)" (click)="closeExcModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header gradient-header">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Add exception</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeExcModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (errorMessage) { <div class="mp-toast mp-toast-danger mb-3">{{ errorMessage }}</div> }
+          <form [formGroup]="excForm">
+            <div class="row g-3">
+              <div class="col-6"><label class="form-label">Type *</label>
+                <select class="form-select" formControlName="type">@for (t of excTypes; track t) { <option [value]="t">{{ t }}</option> }</select>
+              </div>
+              <div class="col-6"><label class="form-label">Severity *</label>
+                <select class="form-select" formControlName="severity">@for (s of severities; track s) { <option [value]="s">{{ s }}</option> }</select>
+              </div>
+              <div class="col-6"><label class="form-label">Reference Type</label>
+                <select class="form-select" formControlName="referenceType">@for (r of refTypes; track r) { <option [value]="r">{{ r }}</option> }</select>
+              </div>
+              <div class="col-6"><label class="form-label">Reference ID</label>
+                <input type="number" class="form-control" formControlName="referenceId" /></div>
+              <div class="col-6">
+                <label class="form-label">Item</label>
+                <select class="form-select" formControlName="itemId">
+                  <option value="">— Select item —</option>
+                  @for (item of items; track item.itemId) { <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option> }
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Facility</label>
+                <select class="form-select" formControlName="facilityId">
+                  <option value="">— Select facility —</option>
+                  @for (f of facilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
+                </select>
+              </div>
+              <div class="col-6"><label class="form-label">Lot ID</label>
+                <input class="form-control" formControlName="lotId" /></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeExcModal()">Cancel</button>
+          <button class="btn btn-primary px-4" (click)="saveExc()" [disabled]="isSavingExc">
+            @if (isSavingExc) { <span class="spinner-border spinner-border-sm me-2"></span>Saving… }
+            @else { <i class="bi bi-save me-2"></i>Save }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Update Status Modal -->
+@if (showStatusModal) {
+  <div class="modal d-block" style="background:rgba(20,32,44,0.55)" (click)="closeStatusModal()">
+    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header gradient-header-edit">
+          <h5 class="modal-title"><i class="bi bi-arrow-repeat me-2"></i>Update status</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeStatusModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="statusForm">
+            <div class="mb-3"><label class="form-label">Status *</label>
+              <select class="form-select" formControlName="status">@for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }</select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeStatusModal()">Cancel</button>
+          <button class="btn btn-primary px-4" (click)="saveStatus()" [disabled]="isSavingStatus">
+            @if (isSavingStatus) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            @else { <i class="bi bi-save me-2"></i> }Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Add/Edit Recall Action Modal -->
+@if (showRecallModal) {
+  <div class="modal d-block" style="background:rgba(20,32,44,0.55)" (click)="closeRecallModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header" [class]="editRecallId ? 'gradient-header-edit' : 'gradient-header'">
+          <h5 class="modal-title"><i class="bi bi-list-check me-2"></i>{{ editRecallId ? 'Edit action' : 'Add recall action' }}</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeRecallModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="recallForm">
+            <div class="row g-3">
+              <div class="col-6"><label class="form-label">Owner ID *</label>
+                <input class="form-control" formControlName="ownerId" /></div>
+              <div class="col-6"><label class="form-label">Due Date *</label>
+                <input type="date" class="form-control" formControlName="dueDate" /></div>
+              <div class="col-12"><label class="form-label">Action Description *</label>
+                <textarea class="form-control" formControlName="actionDescription" rows="2"></textarea></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeRecallModal()">Cancel</button>
+          <button class="btn btn-primary px-4" (click)="saveRecall()" [disabled]="isSavingRecall">
+            @if (isSavingRecall) { <span class="spinner-border spinner-border-sm me-2"></span>Saving… }
+            @else { <i class="bi bi-save me-2"></i>Save }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

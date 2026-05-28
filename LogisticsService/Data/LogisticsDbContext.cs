@@ -1,0 +1,52 @@
+using LogisticsService.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace LogisticsService.Data;
+
+public class LogisticsDbContext : DbContext
+{
+    public LogisticsDbContext(DbContextOptions<LogisticsDbContext> options) : base(options) { }
+
+    public DbSet<TransferOrder>     TransferOrders     => Set<TransferOrder>();
+    public DbSet<TransferOrderItem> TransferOrderItems => Set<TransferOrderItem>();
+    public DbSet<ConsumptionRecord> ConsumptionRecords => Set<ConsumptionRecord>();
+
+    protected override void OnModelCreating(ModelBuilder mb)
+    {
+        // ── TransferOrder ─────────────────────────────────────────────────
+        mb.Entity<TransferOrder>(entity =>
+        {
+            entity.ToTable("TransferOrder");
+            entity.HasKey(e => e.TransferOrderId);
+            entity.Property(e => e.FromFacilityName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.ToFacilityName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.RequestedBy).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.RequestedDate).IsRequired().HasColumnType("datetime2");
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(50).HasDefaultValue("Draft");
+        });
+
+        // ── TransferOrderItem ─────────────────────────────────────────────
+        mb.Entity<TransferOrderItem>(entity =>
+        {
+            entity.ToTable("TransferOrderItem");
+            entity.HasKey(e => e.TransferOrderItemId);
+            entity.Property(e => e.ItemName).IsRequired().HasMaxLength(150);
+
+            entity.HasOne(i => i.TransferOrder)
+                  .WithMany(t => t.Items)
+                  .HasForeignKey(i => i.TransferOrderId)
+                  .HasConstraintName("FK_TransferOrderItem_TransferOrder")
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ── ConsumptionRecord ─────────────────────────────────────────────
+        mb.Entity<ConsumptionRecord>(entity =>
+        {
+            entity.ToTable("ConsumptionRecord");
+            entity.HasKey(e => e.ConsumptionId);
+            entity.Property(e => e.ItemName).IsRequired().HasMaxLength(150);
+            entity.Property(e => e.ConsumedDate).IsRequired().HasColumnType("datetime2");
+            entity.Property(e => e.ConsumedBy).IsRequired().HasMaxLength(100);
+        });
+    }
+}

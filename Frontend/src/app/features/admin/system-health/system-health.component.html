@@ -1,0 +1,128 @@
+<div class="mp-page">
+
+  <!-- Hero -->
+  <div class="mp-hero">
+    <div>
+      <div class="mp-crumb">Dashboard / Admin / <b>System Health</b></div>
+      <h1 class="mp-h1">System Health</h1>
+      <p class="mp-sub">Real-time connectivity status and response latency for all microservices.</p>
+    </div>
+    <button class="mp-btn" (click)="checkAll()" [disabled]="isChecking">
+      <i class="bi bi-arrow-clockwise me-1" [class.spin-icon]="isChecking"></i>
+      {{ isChecking ? 'Checking…' : 'Re-check all' }}
+    </button>
+  </div>
+
+  <div class="mp-content">
+
+    <!-- KPIs -->
+    <div class="mp-kpis">
+      <div class="mp-kpi">
+        <div class="mp-kpi-label">Services</div>
+        <div class="mp-kpi-value">{{ services.length }}</div>
+        <div class="mp-kpi-foot">Microservices total</div>
+      </div>
+      <div class="mp-kpi" style="--kpi-accent:#059669">
+        <div class="mp-kpi-label">Online</div>
+        <div class="mp-kpi-value" style="color:#059669">{{ onlineCount }}</div>
+        <div class="mp-kpi-foot">Responding normally</div>
+      </div>
+      <div class="mp-kpi" style="--kpi-accent:#dc2626">
+        <div class="mp-kpi-label">Offline</div>
+        <div class="mp-kpi-value" style="color:#dc2626">{{ offlineCount }}</div>
+        <div class="mp-kpi-foot">Not reachable</div>
+      </div>
+      <div class="mp-kpi" style="--kpi-accent:#f59e0b">
+        <div class="mp-kpi-label">Probing</div>
+        <div class="mp-kpi-value" style="color:#f59e0b">{{ checkingCount }}</div>
+        <div class="mp-kpi-foot">In flight</div>
+      </div>
+    </div>
+
+    <!-- Overall banner -->
+    @if (!isChecking && lastChecked) {
+      @if (allOnline) {
+        <div class="mp-toast mp-toast-success" style="margin-bottom:16px">
+          <i class="bi bi-check-circle-fill"></i>All {{ services.length }} services are online — checked at {{ lastChecked | date:'HH:mm:ss' }}
+        </div>
+      } @else if (offlineCount > 0) {
+        <div class="mp-toast mp-toast-danger" style="margin-bottom:16px">
+          <i class="bi bi-exclamation-triangle-fill"></i>{{ offlineCount }} service(s) offline — last checked at {{ lastChecked | date:'HH:mm:ss' }}
+        </div>
+      }
+    }
+
+    <!-- Service table -->
+    <div class="mp-card">
+      <div class="mp-card-header">
+        <div>
+          <div class="mp-eyebrow">Status</div>
+          <div class="mp-card-title">
+            All microservices
+            @if (lastChecked) {
+              <span class="text-muted ms-2" style="font-size:11px;font-weight:400;vertical-align:middle">
+                Last probed {{ lastChecked | date:'HH:mm:ss' }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="mp-card-body">
+        <div class="table-responsive">
+          <table class="table" style="font-size:13px">
+            <thead>
+              <tr>
+                <th style="width:46px">#</th>
+                <th>Service</th>
+                <th>Description</th>
+                <th>Port</th>
+                <th style="width:140px">Status</th>
+                <th class="text-end" style="width:100px">Latency</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of services; track s.name; let i = $index) {
+                <tr>
+                  <td class="text-muted">{{ i + 1 }}</td>
+                  <td class="fw-semibold">{{ s.name }}</td>
+                  <td class="text-muted">{{ s.description }}</td>
+                  <td><code style="font-size:11px;color:#64748b">:{{ s.port }}</code></td>
+                  <td>
+                    @if (s.status === 'checking') {
+                      <span class="badge-status bg-warning" style="font-size:11px">
+                        <span class="spinner-border" style="width:8px;height:8px;border-width:1.5px;vertical-align:middle;margin-right:4px"></span>Checking…
+                      </span>
+                    } @else if (s.status === 'online') {
+                      <span class="badge-status bg-success" style="font-size:11px">
+                        <i class="bi bi-check-circle-fill me-1"></i>Online
+                      </span>
+                    } @else {
+                      <span class="badge-status bg-danger" style="font-size:11px">
+                        <i class="bi bi-x-circle-fill me-1"></i>Offline
+                      </span>
+                    }
+                  </td>
+                  <td class="text-end fw-semibold">
+                    @if (s.latencyMs !== null) {
+                      <span [ngClass]="latencyClass(s.latencyMs)">{{ s.latencyMs }} ms</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back link -->
+    <div class="mt-3">
+      <a routerLink="/admin/dashboard" class="mp-card-link" style="font-size:13px">
+        <i class="bi bi-arrow-left me-1"></i>Back to admin console
+      </a>
+    </div>
+
+  </div>
+</div>

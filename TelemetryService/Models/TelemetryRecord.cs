@@ -35,10 +35,6 @@ public class TelemetryRecord
     // Auto-set on ingest by TelemetryServiceImpl.
     public bool IsExcursion { get; set; } = false;
 
-    // Human-readable explanation of which threshold was breached. Null when IsExcursion is false.
-    [MaxLength(500)]
-    public string? ExcursionNote { get; set; }
-
     // Navigation — back-reference to the owning SensorDevice.
     public SensorDevice? SensorDevice { get; set; }
 }

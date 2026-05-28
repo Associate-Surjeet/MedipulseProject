@@ -1,0 +1,97 @@
+<div class="mp-page">
+  <div class="mp-hero">
+    <div>
+      <div class="mp-crumb">Dashboard / <b>Notifications</b></div>
+      <h1 class="mp-h1">Notifications</h1>
+      <p class="mp-sub">System alerts, expiry warnings, and replenishment notices.</p>
+    </div>
+    <button class="mp-btn mp-btn-secondary" (click)="markAllRead()" [disabled]="isMarkingAll || unreadCount === 0">
+      @if (isMarkingAll) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      @else { <i class="bi bi-check2-all me-1"></i> }
+      Mark all read
+    </button>
+  </div>
+
+  <div class="mp-content">
+    @if (successMessage) {
+      <div class="mp-toast mp-toast-success"><i class="bi bi-check-circle-fill"></i>{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="mp-toast mp-toast-danger"><i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}</div>
+    }
+
+    <!-- Filters -->
+    <div class="mp-card" style="margin-bottom:16px">
+      <div class="mp-card-body" style="padding:12px 16px">
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0" style="font-size:13px;white-space:nowrap">Category</label>
+            <select class="form-select form-select-sm" style="width:150px" [(ngModel)]="categoryFilter" (change)="load()">
+              <option value="">All</option>
+              @for (c of categories; track c) { <option [value]="c">{{ c }}</option> }
+            </select>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0" style="font-size:13px">Status</label>
+            <select class="form-select form-select-sm" style="width:130px" [(ngModel)]="isReadFilter" (change)="load()">
+              <option value="">All</option>
+              <option value="false">Unread</option>
+              <option value="true">Read</option>
+            </select>
+          </div>
+          <div class="ms-auto text-muted" style="font-size:13px">
+            <i class="bi bi-bell-fill me-1"></i>{{ unreadCount }} unread
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification list -->
+    @if (isLoading) {
+      <div class="empty-state"><div class="spinner-border" role="status"></div></div>
+    } @else if (notifications.length === 0) {
+      <div class="mp-card">
+        <div class="empty-state" style="padding:3rem">
+          <i class="bi bi-bell-slash" style="font-size:2.5rem;color:#94a3b8"></i>
+          <p class="fw-semibold mb-1 mt-3">No notifications</p>
+          <p class="small text-muted">You're all caught up.</p>
+        </div>
+      </div>
+    } @else {
+      <div class="d-flex flex-column gap-2">
+        @for (n of notifications; track n.notificationId) {
+          <div class="mp-card" style="cursor:pointer;border-left:4px solid transparent"
+            [style.border-left-color]="!n.isRead ? '#2563eb' : 'transparent'"
+            [style.background]="!n.isRead ? '#f8faff' : '#fff'"
+            (click)="markRead(n)">
+            <div class="mp-card-body" style="padding:14px 16px">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div class="d-flex gap-3 align-items-start" style="flex:1;min-width:0">
+                  <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:#fff"
+                    [style.background]="!n.isRead ? '#2563eb' : '#94a3b8'">
+                    <i class="bi" [ngClass]="categoryIcon(n.category)"></i>
+                  </div>
+                  <div style="min-width:0">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      <span class="fw-semibold" style="font-size:14px">{{ n.title }}</span>
+                      <span class="badge-status" [ngClass]="categoryClass(n.category)" style="font-size:10px">{{ n.category }}</span>
+                      @if (!n.isRead) { <span class="badge-status bg-primary" style="font-size:10px">New</span> }
+                    </div>
+                    <div class="text-muted mt-1" style="font-size:13px">{{ n.message }}</div>
+                    <div class="text-muted mt-1" style="font-size:11px">
+                      <i class="bi bi-clock me-1"></i>{{ n.createdAt | date:'dd MMM yyyy, HH:mm' }}
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline-danger flex-shrink-0" style="padding:2px 8px;font-size:11px"
+                  (click)="$event.stopPropagation(); delete(n.notificationId)">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

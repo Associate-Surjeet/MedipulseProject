@@ -35,7 +35,6 @@ export class ReceiptsComponent implements OnInit {
       receivedBy:       ['', [Validators.required, Validators.maxLength(100)]],
       qualityStatus:    ['Accepted', Validators.required],
       quantityReceived: [null, [Validators.required, Validators.min(1)]],
-      remarks:          [''],
     });
   }
 
@@ -61,7 +60,7 @@ export class ReceiptsComponent implements OnInit {
   openAdd() { this.editId = null; this.form.reset({ receivedDate: this.today(), qualityStatus: 'Accepted' }); this.showModal = true; }
   openEdit(r: ReceiptDto) {
     this.editId = r.receiptId;
-    this.form.setValue({ poId: r.poId, supplierLot: r.supplierLot ?? '', receivedDate: this.toDate(r.receivedDate), receivedBy: r.receivedBy, qualityStatus: r.qualityStatus, quantityReceived: r.quantityReceived, remarks: r.remarks ?? '' });
+    this.form.setValue({ poId: r.poId, supplierLot: r.supplierLot ?? '', receivedDate: this.toDate(r.receivedDate), receivedBy: r.receivedBy, qualityStatus: r.qualityStatus, quantityReceived: r.quantityReceived });
     this.showModal = true;
   }
   closeModal() { this.showModal = false; }
@@ -70,9 +69,9 @@ export class ReceiptsComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSaving = true;
     const v = this.form.value;
-    const payload = { poId: v.poId, supplierLot: v.supplierLot || undefined, receivedDate: v.receivedDate, receivedBy: v.receivedBy, qualityStatus: v.qualityStatus, quantityReceived: v.quantityReceived, remarks: v.remarks || undefined };
+    const payload = { poId: v.poId, supplierLot: v.supplierLot || undefined, receivedDate: v.receivedDate, receivedBy: v.receivedBy, qualityStatus: v.qualityStatus, quantityReceived: v.quantityReceived };
     const obs = this.editId
-      ? this.svc.updateReceipt(this.editId, { supplierLot: payload.supplierLot, receivedDate: payload.receivedDate, receivedBy: payload.receivedBy, qualityStatus: payload.qualityStatus, quantityReceived: payload.quantityReceived, remarks: payload.remarks })
+      ? this.svc.updateReceipt(this.editId, { supplierLot: payload.supplierLot, receivedDate: payload.receivedDate, receivedBy: payload.receivedBy, qualityStatus: payload.qualityStatus, quantityReceived: payload.quantityReceived })
       : this.svc.createReceipt(payload);
     obs.subscribe({
       next: () => { this.isSaving = false; this.closeModal(); this.showSuccess(this.editId ? 'Receipt updated.' : 'Receipt created.'); this.loadAll(); },

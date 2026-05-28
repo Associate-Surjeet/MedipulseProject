@@ -43,7 +43,6 @@ public class TelemetryDbContext : DbContext
             entity.Property(e => e.Humidity).HasColumnType("decimal(5,2)");
             entity.Property(e => e.Location).HasMaxLength(200);
             entity.Property(e => e.IsExcursion).IsRequired().HasDefaultValue(false);
-            entity.Property(e => e.ExcursionNote).HasMaxLength(500);
 
             // SensorDevice -> TelemetryRecords: Cascade delete
             entity.HasOne(t => t.SensorDevice)

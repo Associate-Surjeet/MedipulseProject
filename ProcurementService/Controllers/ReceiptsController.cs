@@ -1,8 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using ProcurementService.DTOs;
 using ProcurementService.Services;
 using Shared.Constants;
 using Shared.Filters;
+using Shared.Helpers;
 
 namespace ProcurementService.Controllers;
 
@@ -13,8 +16,22 @@ namespace ProcurementService.Controllers;
 public class ReceiptsController : ControllerBase
 {
     private readonly IProcurementService _service;
+    private readonly IHttpClientFactory  _httpClientFactory;
+    private readonly string?             _notifBaseUrl;
 
-    public ReceiptsController(IProcurementService service) => _service = service;
+    private string  CallerId    => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                                ?? User.FindFirst("sub")?.Value ?? string.Empty;
+    private string? BearerToken => HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+
+    public ReceiptsController(
+        IProcurementService service,
+        IHttpClientFactory  httpClientFactory,
+        IConfiguration      configuration)
+    {
+        _service           = service;
+        _httpClientFactory = httpClientFactory;
+        _notifBaseUrl      = configuration["NotificationService:BaseUrl"];
+    }
 
     // GET /api/receipts
     [HttpGet]
@@ -40,6 +57,14 @@ public class ReceiptsController : ControllerBase
         try
         {
             var created = await _service.CreateReceiptAsync(request);
+
+            NotificationClient.Send(
+                _httpClientFactory, _notifBaseUrl, BearerToken,
+                userId:   CallerId,
+                category: "Receipt",
+                title:    "Goods Receipt Recorded",
+                message:  $"Receipt #{created.ReceiptId} recorded for PO #{created.PoId} ({created.QuantityReceived} units, status: {created.QualityStatus})");
+
             return CreatedAtAction(nameof(GetById), new { id = created.ReceiptId }, created);
         }
         catch (InvalidOperationException ex)

@@ -24,10 +24,6 @@ public class InventoryPosition
 
     public int SafetyStock { get; set; }                   // reorder threshold for this item at this facility
 
-    public DateTime ReceivedDate { get; set; } = DateTime.UtcNow;  // FIFO: oldest received is consumed first
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
     // Navigation property — lets us access Item.Name, Item.Unit etc. from a position
     [ForeignKey(nameof(ItemId))]
     public Item? Item { get; set; }

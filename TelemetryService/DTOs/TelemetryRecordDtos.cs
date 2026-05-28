@@ -15,7 +15,6 @@ public class TelemetryRecordDto
     public decimal? Humidity      { get; set; }
     public string?  Location      { get; set; }
     public bool     IsExcursion   { get; set; }
-    public string?  ExcursionNote { get; set; }
 }
 
 public class CreateTelemetryRecordRequest

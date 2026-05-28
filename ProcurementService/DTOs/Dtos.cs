@@ -108,7 +108,6 @@ public class ReceiptDto
     public string   ReceivedBy       { get; set; } = string.Empty;
     public string   QualityStatus    { get; set; } = string.Empty;
     public int      QuantityReceived { get; set; }
-    public string?  Remarks          { get; set; }
     // Resolved via EF: Receipt -> PurchaseOrder -> Supplier
     public string   SupplierName     { get; set; } = string.Empty;
 }
@@ -136,9 +135,6 @@ public class CreateReceiptRequest
     [Required(ErrorMessage = "QuantityReceived is required.")]
     [Range(1, int.MaxValue, ErrorMessage = "QuantityReceived must be at least 1.")]
     public int QuantityReceived { get; set; }
-
-    [MaxLength(500)]
-    public string? Remarks { get; set; }
 }
 
 public class UpdateReceiptRequest
@@ -161,7 +157,4 @@ public class UpdateReceiptRequest
     [Required(ErrorMessage = "QuantityReceived is required.")]
     [Range(1, int.MaxValue, ErrorMessage = "QuantityReceived must be at least 1.")]
     public int QuantityReceived { get; set; }
-
-    [MaxLength(500)]
-    public string? Remarks { get; set; }
 }

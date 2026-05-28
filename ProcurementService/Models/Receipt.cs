@@ -31,9 +31,6 @@ public class Receipt
     [Required]
     public int QuantityReceived { get; set; }
 
-    [MaxLength(500)]
-    public string? Remarks { get; set; }
-
     [ForeignKey(nameof(PoId))]
     public PurchaseOrder? PurchaseOrder { get; set; }
 }

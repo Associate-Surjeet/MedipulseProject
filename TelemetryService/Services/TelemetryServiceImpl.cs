@@ -139,8 +139,7 @@ public class TelemetryServiceImpl : ITelemetryService
         record.Location    = request.Location;
 
         // Re-run excursion detection whenever values change.
-        record.IsExcursion   = false;
-        record.ExcursionNote = null;
+        record.IsExcursion = false;
         DetectExcursion(record);
 
         await _db.SaveChangesAsync();
@@ -162,27 +161,21 @@ public class TelemetryServiceImpl : ITelemetryService
     // Safe pharmaceutical cold-chain ranges: 2–8 °C, 30–85 % RH.
     private static void DetectExcursion(TelemetryRecord record)
     {
-        var notes = new List<string>();
+        bool excursion = false;
 
         if (record.Temperature.HasValue)
         {
             var t = record.Temperature.Value;
-            if (t > 8.0m || t < 2.0m)
-                notes.Add($"Temperature excursion: {t}°C is outside safe range 2–8°C");
+            if (t > 8.0m || t < 2.0m) excursion = true;
         }
 
         if (record.Humidity.HasValue)
         {
             var h = record.Humidity.Value;
-            if (h > 85.0m || h < 30.0m)
-                notes.Add($"Humidity excursion: {h}% is outside safe range 30–85%");
+            if (h > 85.0m || h < 30.0m) excursion = true;
         }
 
-        if (notes.Count > 0)
-        {
-            record.IsExcursion   = true;
-            record.ExcursionNote = string.Join(" | ", notes);
-        }
+        record.IsExcursion = excursion;
     }
 
     private static SensorDeviceDto ToSensorDto(SensorDevice s) => new()
@@ -203,7 +196,6 @@ public class TelemetryServiceImpl : ITelemetryService
         Temperature   = t.Temperature,
         Humidity      = t.Humidity,
         Location      = t.Location,
-        IsExcursion   = t.IsExcursion,
-        ExcursionNote = t.ExcursionNote
+        IsExcursion   = t.IsExcursion
     };
 }

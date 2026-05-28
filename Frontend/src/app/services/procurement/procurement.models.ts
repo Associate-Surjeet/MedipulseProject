@@ -29,8 +29,7 @@ export interface ReceiptDto {
   receivedBy: string;
   qualityStatus: string;
   quantityReceived: number;
-  remarks?: string;
   supplierName: string;
 }
-export interface CreateReceiptRequest { poId: number; supplierLot?: string; receivedDate: string; receivedBy: string; qualityStatus: string; quantityReceived: number; remarks?: string; }
-export interface UpdateReceiptRequest { supplierLot?: string; receivedDate: string; receivedBy: string; qualityStatus: string; quantityReceived: number; remarks?: string; }
+export interface CreateReceiptRequest { poId: number; supplierLot?: string; receivedDate: string; receivedBy: string; qualityStatus: string; quantityReceived: number; }
+export interface UpdateReceiptRequest { supplierLot?: string; receivedDate: string; receivedBy: string; qualityStatus: string; quantityReceived: number; }

@@ -86,12 +86,7 @@
                     <td class="text-center fw-semibold">{{ r.humidity != null ? r.humidity : '—' }}</td>
                     <td class="text-muted">{{ r.location || '—' }}</td>
                     <td>
-                      <div class="d-flex align-items-center gap-1">
-                        <span class="badge-status" [ngClass]="excursionBadge(r.isExcursion)">{{ r.isExcursion ? 'Excursion' : 'Normal' }}</span>
-                        @if (r.isExcursion && r.excursionNote) {
-                          <i class="bi bi-info-circle-fill" style="color:#C44536;font-size:0.8rem" [title]="r.excursionNote"></i>
-                        }
-                      </div>
+                      <span class="badge-status" [ngClass]="excursionBadge(r.isExcursion)">{{ r.isExcursion ? 'Excursion' : 'Normal' }}</span>
                     </td>
                     <td class="text-center">
                       <div class="d-flex justify-content-center gap-1">

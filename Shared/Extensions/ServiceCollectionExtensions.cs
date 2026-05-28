@@ -53,10 +53,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediPulseControllers(
         this IServiceCollection services)
     {
+        // IHttpClientFactory is required by ActivityLogFilter to post to AuditService.
+        services.AddHttpClient();
+
         services.AddControllers(options =>
         {
             options.Filters.Add<GlobalExceptionFilter>(); // unhandled exceptions → JSON 500
-            options.Filters.Add<ActivityLogFilter>();     // logs every request
+            options.Filters.Add<ActivityLogFilter>();     // logs every request + audit POST
             options.Filters.Add<ValidationFilter>();      // DTO annotations → JSON 400
         });
 

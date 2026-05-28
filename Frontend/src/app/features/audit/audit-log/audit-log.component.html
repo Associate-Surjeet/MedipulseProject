@@ -1,0 +1,135 @@
+<div class="mp-page">
+  <div class="mp-hero">
+    <div>
+      <div class="mp-crumb">Dashboard / Admin / <b>Audit Log</b></div>
+      <h1 class="mp-h1">Audit Log</h1>
+      <p class="mp-sub">Full activity trail — who did what, when, and which service handled it.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="mp-btn mp-btn-secondary" (click)="resetFilters()"><i class="bi bi-x-circle me-1"></i>Reset</button>
+      <button class="mp-btn" (click)="applyFilters()"><i class="bi bi-funnel me-1"></i>Apply</button>
+    </div>
+  </div>
+
+  <div class="mp-content">
+    @if (errorMessage) {
+      <div class="mp-toast mp-toast-danger"><i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}</div>
+    }
+
+    <!-- Filters -->
+    <div class="mp-card" style="margin-bottom:16px">
+      <div class="mp-card-body" style="padding:14px 16px">
+        <div class="row g-2">
+          <div class="col-md-2"><input class="form-control form-control-sm" placeholder="User ID" [(ngModel)]="filterUserId" /></div>
+          <div class="col-md-2"><input class="form-control form-control-sm" placeholder="Role" [(ngModel)]="filterRole" /></div>
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filterMethod">
+              <option value="">All methods</option>
+              @for (m of methods; track m) { <option [value]="m">{{ m }}</option> }
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filterService">
+              <option value="">All services</option>
+              @for (s of services; track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+          <div class="col-md-2"><input class="form-control form-control-sm" placeholder="Entity type" [(ngModel)]="filterEntityType" /></div>
+          <div class="col-md-1"><input type="date" class="form-control form-control-sm" [(ngModel)]="filterFrom" title="From date" /></div>
+          <div class="col-md-1"><input type="date" class="form-control form-control-sm" [(ngModel)]="filterTo" title="To date" /></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-3" style="align-items:flex-start">
+      <!-- Log table -->
+      <div style="flex:1;min-width:0">
+        <div class="mp-card">
+          <div class="mp-card-header">
+            <div>
+              <div class="mp-eyebrow">Audit trail</div>
+              <div class="mp-card-title">Events <span class="mp-tag mp-tag-gray ms-2" style="font-size:11px;vertical-align:middle">{{ total }} total</span></div>
+            </div>
+          </div>
+          <div class="mp-card-body">
+            @if (isLoading) {
+              <div class="empty-state"><div class="spinner-border" role="status"></div></div>
+            } @else if (logs.length === 0) {
+              <div class="empty-state"><i class="bi bi-file-earmark-text"></i><p class="fw-semibold mb-1">No audit events found</p></div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table" style="font-size:13px">
+                  <thead><tr>
+                    <th>Timestamp</th><th>User</th><th>Role</th><th>Method</th><th>Endpoint</th><th>Service</th><th>Status</th><th>Entity</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (log of logs; track log.auditLogId) {
+                      <tr style="cursor:pointer" [class.table-active]="selectedLog?.auditLogId===log.auditLogId" (click)="selectedLog = selectedLog?.auditLogId===log.auditLogId ? null : log">
+                        <td class="text-muted" style="white-space:nowrap">{{ log.timestamp | date:'dd MMM, HH:mm:ss' }}</td>
+                        <td>
+                          <div class="fw-semibold mb-1" style="font-size:12px;line-height:1.3">{{ log.userName ?? log.userId }}</div>
+                          <div class="text-muted" style="font-size:10px;line-height:1.3">ID: {{ log.userId }}</div>
+                        </td>
+                        <td class="text-muted">{{ log.userRole ?? '—' }}</td>
+                        <td><span class="badge-status" [ngClass]="methodClass(log.httpMethod)" style="font-size:10px">{{ log.httpMethod }}</span></td>
+                        <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" class="text-muted">{{ log.endpoint }}</td>
+                        <td class="text-muted" style="font-size:11px">{{ log.serviceName ?? '—' }}</td>
+                        <td><span class="badge-status" [ngClass]="statusClass(log.statusCode)" style="font-size:10px">{{ log.statusCode }}</span></td>
+                        <td class="text-muted" style="font-size:11px">{{ log.entityType ? log.entityType + ' #' + log.entityId : '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              @if (pages > 1) {
+                <div class="d-flex justify-content-between align-items-center mt-3" style="font-size:13px">
+                  <div class="text-muted">Page {{ page }} of {{ pages }} · {{ total }} events</div>
+                  <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                      <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="goPage(page-1)">‹</a></li>
+                      @for (n of pageNums; track n) {
+                        <li class="page-item" [class.active]="n===page"><a class="page-link" (click)="goPage(n)">{{ n }}</a></li>
+                      }
+                      <li class="page-item" [class.disabled]="page===pages"><a class="page-link" (click)="goPage(page+1)">›</a></li>
+                    </ul>
+                  </nav>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      @if (selectedLog) {
+        <div class="mp-card" style="width:320px;flex-shrink:0">
+          <div class="mp-card-header">
+            <div><div class="mp-eyebrow">Detail</div><div class="mp-card-title" style="font-size:14px">Event #{{ selectedLog.auditLogId }}</div></div>
+            <button class="btn btn-sm btn-outline-secondary" (click)="selectedLog=null"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="mp-card-body" style="font-size:13px">
+            <table class="table table-sm table-borderless">
+              <tbody>
+                <tr><td class="text-muted fw-semibold" style="width:40%">Time</td><td>{{ selectedLog.timestamp | date:'dd MMM yyyy, HH:mm:ss' }}</td></tr>
+                <tr><td class="text-muted fw-semibold">User ID</td><td>{{ selectedLog.userId }}</td></tr>
+                <tr><td class="text-muted fw-semibold">User Name</td><td>{{ selectedLog.userName ?? '—' }}</td></tr>
+                <tr><td class="text-muted fw-semibold">Role</td><td>{{ selectedLog.userRole ?? '—' }}</td></tr>
+                <tr><td class="text-muted fw-semibold">Method</td><td><span class="badge-status" [ngClass]="methodClass(selectedLog.httpMethod)" style="font-size:10px">{{ selectedLog.httpMethod }}</span></td></tr>
+                <tr><td class="text-muted fw-semibold">Endpoint</td><td style="word-break:break-all">{{ selectedLog.endpoint }}</td></tr>
+                <tr><td class="text-muted fw-semibold">Service</td><td>{{ selectedLog.serviceName ?? '—' }}</td></tr>
+                <tr><td class="text-muted fw-semibold">Status</td><td><span class="badge-status" [ngClass]="statusClass(selectedLog.statusCode)" style="font-size:10px">{{ selectedLog.statusCode }}</span></td></tr>
+                <tr><td class="text-muted fw-semibold">Entity</td><td>{{ selectedLog.entityType ?? '—' }}</td></tr>
+                <tr><td class="text-muted fw-semibold">Entity ID</td><td>{{ selectedLog.entityId ?? '—' }}</td></tr>
+                @if (selectedLog.details) {
+                  <tr><td class="text-muted fw-semibold" style="vertical-align:top">Details</td><td style="word-break:break-all;font-size:11px">{{ selectedLog.details }}</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

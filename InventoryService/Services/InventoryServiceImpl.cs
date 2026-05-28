@@ -19,7 +19,7 @@ public class InventoryServiceImpl : IInventoryService
     public async Task<IEnumerable<ItemResponse>> GetAllItemsAsync()
     {
         var items = await _context.Items
-            .Include(i => i.Positions)   // load related positions so we can sum up TotalStock
+            .Include(i => i.Positions)
             .ToListAsync();
 
         return items.Select(MapItemToResponse);
@@ -40,7 +40,6 @@ public class InventoryServiceImpl : IInventoryService
         {
             ItemCode           = request.ItemCode,
             Name               = request.Name,
-            Description        = request.Description,
             Category           = request.Category,
             Unit               = request.Unit,
             StorageRequirement = request.StorageRequirement,
@@ -61,14 +60,11 @@ public class InventoryServiceImpl : IInventoryService
 
         if (item is null) return null;
 
-        // Only update fields that were actually sent (not null)
         if (request.Name               is not null) item.Name               = request.Name;
-        if (request.Description        is not null) item.Description        = request.Description;
         if (request.Category           is not null) item.Category           = request.Category;
         if (request.Unit               is not null) item.Unit               = request.Unit;
         if (request.StorageRequirement is not null) item.StorageRequirement = request.StorageRequirement;
         if (request.SafetyStock        is not null) item.SafetyStock        = request.SafetyStock.Value;
-        if (request.IsActive           is not null) item.IsActive           = request.IsActive.Value;
 
         await _context.SaveChangesAsync();
         return MapItemToResponse(item);
@@ -90,7 +86,7 @@ public class InventoryServiceImpl : IInventoryService
     {
         var positions = await _context.InventoryPositions
             .Include(p => p.Item)
-            .OrderBy(p => p.ExpiryDate)   // FEFO: soonest expiry appears first
+            .OrderBy(p => p.ExpiryDate)   // FEFO
             .ToListAsync();
 
         return positions.Select(MapPositionToResponse);
@@ -101,8 +97,8 @@ public class InventoryServiceImpl : IInventoryService
         var positions = await _context.InventoryPositions
             .Include(p => p.Item)
             .Where(p => p.ItemId == itemId)
-            .OrderBy(p => p.ExpiryDate)      // FEFO: consume soonest-expiring lot first
-            .ThenBy(p => p.ReceivedDate)     // FIFO: if same expiry, consume oldest-received first
+            .OrderBy(p => p.ExpiryDate)       // FEFO
+            .ThenBy(p => p.PositionId)        // FIFO fallback
             .ToListAsync();
 
         return positions.Select(MapPositionToResponse);
@@ -127,14 +123,12 @@ public class InventoryServiceImpl : IInventoryService
             Quantity      = request.Quantity,
             FacilityId    = request.FacilityId,
             StorageZoneId = request.StorageZoneId,
-            SafetyStock   = request.SafetyStock,
-            ReceivedDate  = request.ReceivedDate ?? DateTime.UtcNow
+            SafetyStock   = request.SafetyStock
         };
 
         _context.InventoryPositions.Add(position);
         await _context.SaveChangesAsync();
 
-        // Reload with Item included so the response has ItemName/ItemCode
         await _context.Entry(position).Reference(p => p.Item).LoadAsync();
 
         return MapPositionToResponse(position);
@@ -169,20 +163,16 @@ public class InventoryServiceImpl : IInventoryService
     }
 
     // ── PRIVATE MAPPERS ───────────────────────────────────────────────────
-    // Converts a Model (DB shape) → DTO (API shape)
 
     private static ItemResponse MapItemToResponse(Item item) => new()
     {
         ItemId             = item.ItemId,
         ItemCode           = item.ItemCode,
         Name               = item.Name,
-        Description        = item.Description,
         Category           = item.Category,
         Unit               = item.Unit,
         StorageRequirement = item.StorageRequirement,
         SafetyStock        = item.SafetyStock,
-        IsActive           = item.IsActive,
-        CreatedAt          = item.CreatedAt,
         TotalStock         = item.Positions.Sum(p => p.Quantity)
     };
 
@@ -197,7 +187,6 @@ public class InventoryServiceImpl : IInventoryService
         Quantity      = p.Quantity,
         FacilityId    = p.FacilityId,
         StorageZoneId = p.StorageZoneId,
-        SafetyStock   = p.SafetyStock,
-        ReceivedDate  = p.ReceivedDate
+        SafetyStock   = p.SafetyStock
     };
 }

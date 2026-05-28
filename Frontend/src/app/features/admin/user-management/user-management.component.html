@@ -94,7 +94,10 @@
                         <button class="btn btn-sm btn-outline-primary" title="Change role" (click)="openRoleModal(user)">
                           <i class="bi bi-pencil-fill"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Delete user" (click)="confirmDelete(user)">
+                        <button class="btn btn-sm btn-outline-danger"
+                                [disabled]="isSelf(user)"
+                                [title]="isSelf(user) ? 'You cannot delete your own account' : 'Delete user'"
+                                (click)="!isSelf(user) && confirmDelete(user)">
                           <i class="bi bi-trash-fill"></i>
                         </button>
                       </div>

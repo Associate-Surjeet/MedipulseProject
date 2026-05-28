@@ -116,6 +116,10 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
+  isSelf(user: UserDto): boolean {
+    return user.email === this.authService.currentUser?.email;
+  }
+
   confirmDelete(user: UserDto): void { this.userToDelete = user; this.showDeleteConfirm = true; }
   cancelDelete(): void { this.showDeleteConfirm = false; this.userToDelete = null; }
 

@@ -17,7 +17,6 @@ export interface TelemetryRecordDto {
   humidity?: number;
   location?: string;
   isExcursion: boolean;
-  excursionNote?: string;
 }
 export interface CreateTelemetryRecordRequest { sensorId: number; timestamp?: string; temperature?: number; humidity?: number; location?: string; }
 export interface UpdateTelemetryRecordRequest { timestamp: string; temperature?: number; humidity?: number; location?: string; }

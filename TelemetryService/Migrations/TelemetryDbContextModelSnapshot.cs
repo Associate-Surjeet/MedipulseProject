@@ -65,10 +65,6 @@ namespace TelemetryService.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TelemetryId"));
 
-                    b.Property<string>("ExcursionNote")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<decimal?>("Humidity")
                         .HasColumnType("decimal(5,2)");
 

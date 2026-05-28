@@ -231,8 +231,7 @@ public class ProcurementServiceImpl : IProcurementService
             ReceivedDate     = request.ReceivedDate,
             ReceivedBy       = request.ReceivedBy,
             QualityStatus    = request.QualityStatus,
-            QuantityReceived = request.QuantityReceived,
-            Remarks          = request.Remarks
+            QuantityReceived = request.QuantityReceived
         };
 
         _db.Receipts.Add(receipt);
@@ -258,7 +257,6 @@ public class ProcurementServiceImpl : IProcurementService
         receipt.ReceivedBy       = request.ReceivedBy;
         receipt.QualityStatus    = request.QualityStatus;
         receipt.QuantityReceived = request.QuantityReceived;
-        receipt.Remarks          = request.Remarks;
 
         await _db.SaveChangesAsync();
         return ToReceiptDto(receipt);
@@ -305,7 +303,6 @@ public class ProcurementServiceImpl : IProcurementService
         ReceivedBy       = r.ReceivedBy,
         QualityStatus    = r.QualityStatus,
         QuantityReceived = r.QuantityReceived,
-        Remarks          = r.Remarks,
         SupplierName     = r.PurchaseOrder?.Supplier?.Name ?? string.Empty
     };
 

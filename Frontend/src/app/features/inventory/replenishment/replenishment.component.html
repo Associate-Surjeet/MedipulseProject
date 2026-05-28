@@ -1,0 +1,131 @@
+<div class="mp-page">
+  <div class="mp-hero">
+    <div>
+      <div class="mp-crumb">Dashboard / Inventory / <b>Replenishment</b></div>
+      <h1 class="mp-h1">Replenishment &amp; Forecasting</h1>
+      <p class="mp-sub">AI-assisted order suggestions based on consumption trends and safety stock levels.</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <select class="form-select form-select-sm" style="width:190px" [(ngModel)]="generateFacilityId">
+        <option value="">— Select facility —</option>
+        @for (f of facilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
+      </select>
+      <button class="mp-btn" (click)="generate()" [disabled]="isGenerating">
+        @if (isGenerating) { <span class="spinner-border spinner-border-sm me-1"></span>Generating… }
+        @else { <i class="bi bi-lightning-charge me-1"></i>Generate }
+      </button>
+    </div>
+  </div>
+
+  <div class="mp-content">
+    @if (successMessage) {
+      <div class="mp-toast mp-toast-success"><i class="bi bi-check-circle-fill"></i>{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="mp-toast mp-toast-danger"><i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}</div>
+    }
+
+    <!-- KPIs -->
+    <div class="mp-kpis">
+      <div class="mp-kpi"><div class="mp-kpi-label">Total Plans</div><div class="mp-kpi-value">{{ plans.length }}</div><div class="mp-kpi-foot">All replenishment</div></div>
+      <div class="mp-kpi" style="--kpi-accent:#f59e0b"><div class="mp-kpi-label">Pending</div><div class="mp-kpi-value" style="color:#f59e0b">{{ pendingCount }}</div><div class="mp-kpi-foot">Awaiting order</div></div>
+      <div class="mp-kpi" style="--kpi-accent:#dc2626"><div class="mp-kpi-label">High Priority</div><div class="mp-kpi-value" style="color:#dc2626">{{ highPrioCount }}</div><div class="mp-kpi-foot">Urgent orders</div></div>
+      <div class="mp-kpi" style="--kpi-accent:#2563eb"><div class="mp-kpi-label">Ordered</div><div class="mp-kpi-value" style="color:#2563eb">{{ orderedCount }}</div><div class="mp-kpi-foot">PO raised</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mp-card">
+      <div class="mp-card-header" style="border-bottom:none;padding-bottom:0">
+        <div class="d-flex gap-3">
+          <button class="btn" [class.btn-primary]="activeTab==='plans'" [class.btn-outline-secondary]="activeTab!=='plans'" style="font-size:13px" (click)="activeTab='plans'">
+            <i class="bi bi-list-ul me-1"></i>Replenishment Plans ({{ plans.length }})
+          </button>
+          <button class="btn" [class.btn-primary]="activeTab==='forecasts'" [class.btn-outline-secondary]="activeTab!=='forecasts'" style="font-size:13px" (click)="activeTab='forecasts'">
+            <i class="bi bi-graph-up me-1"></i>Forecasts ({{ forecasts.length }})
+          </button>
+        </div>
+        @if (activeTab === 'plans') {
+          <div class="mp-card-actions" style="gap:8px">
+            <select class="form-select form-select-sm" style="width:120px" [(ngModel)]="planPriorityFilter" (change)="applyPlanFilter()">
+              <option value="">All priority</option>
+              @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+            </select>
+            <select class="form-select form-select-sm" style="width:120px" [(ngModel)]="planStatusFilter" (change)="applyPlanFilter()">
+              <option value="">All status</option>
+              @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+        }
+      </div>
+
+      <div class="mp-card-body" style="padding-top:12px">
+        @if (isLoading) {
+          <div class="empty-state"><div class="spinner-border" role="status"></div></div>
+        } @else if (activeTab === 'plans') {
+          @if (filteredPlans.length === 0) {
+            <div class="empty-state">
+              <i class="bi bi-box-seam"></i>
+              <p class="fw-semibold mb-1">No replenishment plans</p>
+              <p class="small">Click "Generate" with a facility ID to create plans based on consumption data.</p>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table">
+                <thead><tr>
+                  <th>Item</th><th>Facility</th><th class="text-end">Suggested Qty</th><th>Priority</th><th>Status</th><th>Generated</th><th class="text-center" style="width:80px">Actions</th>
+                </tr></thead>
+                <tbody>
+                  @for (p of filteredPlans; track p.planId) {
+                    <tr>
+                      <td>
+                        <div class="fw-semibold">Item #{{ p.itemId }}</div>
+                        <div class="text-muted" style="font-size:11px">ID: {{ p.itemId }}</div>
+                      </td>
+                      <td class="text-muted">{{ p.facilityId }}</td>
+                      <td class="text-end fw-semibold text-primary">{{ p.suggestedOrderQty }}</td>
+                      <td><span class="badge-status" [ngClass]="priorityClass(p.priority)">{{ p.priority }}</span></td>
+                      <td>
+                        <select class="form-select form-select-sm" style="width:110px;font-size:12px"
+                          [value]="p.status" (change)="updateStatus(p, $any($event.target).value)"
+                          [disabled]="updatingPlanId === p.planId">
+                          @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+                        </select>
+                      </td>
+                      <td class="text-muted" style="font-size:12px">{{ p.generatedDate | date:'dd MMM yyyy' }}</td>
+                      <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger" (click)="deletePlan(p.planId)"><i class="bi bi-trash-fill"></i></button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        } @else {
+          @if (forecasts.length === 0) {
+            <div class="empty-state"><i class="bi bi-graph-up"></i><p class="fw-semibold mb-1">No forecasts yet</p><p class="small">Run generation to create forecasts.</p></div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table">
+                <thead><tr>
+                  <th>Item</th><th>Facility</th><th>Period</th><th class="text-end">Forecast Qty</th><th>Generated</th>
+                </tr></thead>
+                <tbody>
+                  @for (f of forecasts; track f.forecastId) {
+                    <tr>
+                      <td class="fw-semibold">Item #{{ f.itemId }}</td>
+                      <td class="text-muted">{{ f.facilityId }}</td>
+                      <td><span class="badge-status bg-primary">{{ f.period }}</span></td>
+                      <td class="text-end fw-semibold text-primary">{{ f.forecastQuantity }}</td>
+                      <td class="text-muted" style="font-size:12px">{{ f.generatedDate | date:'dd MMM yyyy' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

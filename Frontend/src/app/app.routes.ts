@@ -22,6 +22,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard',  loadComponent: () => import('./features/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent) },
       { path: 'users',      loadComponent: () => import('./features/admin/user-management/user-management.component').then(m => m.UserManagementComponent) },
+      { path: 'health',     loadComponent: () => import('./features/admin/system-health/system-health.component').then(m => m.SystemHealthComponent) },
       { path: '',           redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
@@ -65,6 +66,45 @@ export const routes: Routes = [
       { path: 'records', loadComponent: () => import('./features/telemetry/telemetry-records/telemetry-records.component').then(m => m.TelemetryRecordsComponent) },
       { path: '',        redirectTo: 'sensors', pathMatch: 'full' },
     ],
+  },
+
+  // Inventory
+  {
+    path: 'inventory',
+    canActivate: [authGuard],
+    children: [
+      { path: 'items',          loadComponent: () => import('./features/inventory/items/items.component').then(m => m.ItemsComponent) },
+      { path: 'stock-positions',loadComponent: () => import('./features/inventory/stock-positions/stock-positions.component').then(m => m.StockPositionsComponent) },
+      { path: 'exceptions',     loadComponent: () => import('./features/inventory/exceptions/exceptions.component').then(m => m.ExceptionsComponent) },
+      { path: 'replenishment',  loadComponent: () => import('./features/inventory/replenishment/replenishment.component').then(m => m.ReplenishmentComponent) },
+      { path: '',               redirectTo: 'items', pathMatch: 'full' },
+    ],
+  },
+
+  // Logistics / Distribution
+  {
+    path: 'distribution',
+    canActivate: [authGuard],
+    children: [
+      { path: 'transfer-orders', loadComponent: () => import('./features/logistics/transfer-orders/transfer-orders.component').then(m => m.TransferOrdersComponent) },
+      { path: 'consumption',     loadComponent: () => import('./features/logistics/consumption/consumption.component').then(m => m.ConsumptionComponent) },
+      { path: '',                redirectTo: 'transfer-orders', pathMatch: 'full' },
+    ],
+  },
+
+  // Notifications
+  {
+    path: 'notifications',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/notifications/notifications-page/notifications-page.component').then(m => m.NotificationsPageComponent),
+  },
+
+  // Audit log — Admin + ComplianceOfficer
+  {
+    path: 'audit',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'ComplianceOfficer'] },
+    loadComponent: () => import('./features/audit/audit-log/audit-log.component').then(m => m.AuditLogComponent),
   },
 
   { path: '**', redirectTo: 'login' },

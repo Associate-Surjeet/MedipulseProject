@@ -51,9 +51,9 @@
                 </a>
               }
               @if (canSeeItems) {
-                <span class="mp-dropdown-item disabled">
-                  <i class="bi bi-capsule text-primary"></i>Items <small class="ms-1">(soon)</small>
-                </span>
+                <a class="mp-dropdown-item" (click)="navigate('/inventory/items')">
+                  <i class="bi bi-capsule text-primary"></i>Items
+                </a>
               }
             </div>
           }
@@ -95,9 +95,21 @@
           </span>
           @if (isOpen('inventory')) {
             <div class="mp-dropdown">
-              <span class="mp-dropdown-item disabled">
-                <i class="bi bi-bar-chart-steps text-success"></i>Stock Positions <small class="ms-1">(soon)</small>
-              </span>
+              @if (canSeeStockPositions) {
+                <a class="mp-dropdown-item" (click)="navigate('/inventory/stock-positions')">
+                  <i class="bi bi-bar-chart-steps text-success"></i>Stock Positions
+                </a>
+              }
+              @if (canSeeExceptions) {
+                <a class="mp-dropdown-item" (click)="navigate('/inventory/exceptions')">
+                  <i class="bi bi-exclamation-triangle text-danger"></i>Exceptions &amp; Recalls
+                </a>
+              }
+              @if (canSeeReplenishment) {
+                <a class="mp-dropdown-item" (click)="navigate('/inventory/replenishment')">
+                  <i class="bi bi-arrow-repeat text-primary"></i>Replenishment
+                </a>
+              }
             </div>
           }
         </div>
@@ -138,12 +150,16 @@
           </span>
           @if (isOpen('distribution')) {
             <div class="mp-dropdown">
-              <span class="mp-dropdown-item disabled">
-                <i class="bi bi-arrow-left-right text-warning"></i>Transfer Orders <small class="ms-1">(soon)</small>
-              </span>
-              <span class="mp-dropdown-item disabled">
-                <i class="bi bi-bag-check text-success"></i>Consumption <small class="ms-1">(soon)</small>
-              </span>
+              @if (canSeeTransfers) {
+                <a class="mp-dropdown-item" (click)="navigate('/distribution/transfer-orders')">
+                  <i class="bi bi-arrow-left-right text-warning"></i>Transfer Orders
+                </a>
+              }
+              @if (canSeeConsumption) {
+                <a class="mp-dropdown-item" (click)="navigate('/distribution/consumption')">
+                  <i class="bi bi-bag-check text-success"></i>Consumption
+                </a>
+              }
             </div>
           }
         </div>
@@ -162,16 +178,35 @@
               <a class="mp-dropdown-item" (click)="navigate('/admin/users')">
                 <i class="bi bi-people text-primary"></i>User Management
               </a>
+              <a class="mp-dropdown-item" (click)="navigate('/audit')">
+                <i class="bi bi-journal-text text-secondary"></i>Audit Log
+              </a>
             </div>
           }
         </div>
       }
 
+      <!-- Compliance: audit log shortcut -->
+      @if (isCompliance && !isAdmin) {
+        <a class="mp-nav-link" (click)="navigate('/audit')">
+          <i class="bi bi-journal-text"></i>Audit Log
+        </a>
+      }
+
     </nav>
 
-    <!-- Right: role badge + logout -->
+    <!-- Right: notifications bell + role badge + logout -->
     @if (currentUser) {
       <div class="mp-top-right">
+        <!-- Notification bell -->
+        <button class="mp-nav-link" style="position:relative;padding:6px 10px" (click)="navigate('/notifications')" title="Notifications">
+          <i class="bi bi-bell"></i>
+          @if (unreadCount > 0) {
+            <span style="position:absolute;top:2px;right:4px;background:#dc2626;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">
+              {{ unreadCount > 99 ? '99+' : unreadCount }}
+            </span>
+          }
+        </button>
         <span class="mp-role-pill">
           <i class="bi bi-person-badge me-1"></i>{{ roleDisplayName }}
         </span>

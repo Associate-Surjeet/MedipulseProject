@@ -2,6 +2,7 @@ using InventoryService.Data;
 using InventoryService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+// Services registered: IInventoryService, IExceptionService, IReplenishmentService
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.Services.AddMediPulseCors();
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IInventoryService, InventoryServiceImpl>();
+builder.Services.AddScoped<IExceptionService, ExceptionServiceImpl>();
+builder.Services.AddScoped<IReplenishmentService, ReplenishmentServiceImpl>();
 
 // ── BUILD & PIPELINE ──────────────────────────────────────────────────────
 var app = builder.Build();

@@ -1,9 +1,10 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { CurrentUser } from '../../services/auth/auth.models';
 import { getRoleDisplayName } from '../../shared/extensions/app.extensions';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-header',
@@ -12,15 +13,40 @@ import { getRoleDisplayName } from '../../shared/extensions/app.extensions';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   currentUser: CurrentUser | null = null;
   activeDropdown: string | null = null;
   showMobileMenu = false;
+  unreadCount = 0;
+  private pollInterval: any;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private notificationSvc: NotificationService,
+  ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe((user) => { this.currentUser = user; });
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+      if (user) {
+        this.loadUnreadCount();
+        // Poll every 15 seconds
+        this.pollInterval = setInterval(() => this.loadUnreadCount(), 15_000);
+      } else {
+        clearInterval(this.pollInterval);
+        this.unreadCount = 0;
+      }
+    });
+  }
+
+  ngOnDestroy(): void { clearInterval(this.pollInterval); }
+
+  private loadUnreadCount() {
+    this.notificationSvc.getUnreadCount().subscribe({
+      next: (r) => this.unreadCount = r.count,
+      error: () => {},
+    });
   }
 
   // ── Role flags ──────────────────────────────────────────────────────────
@@ -45,15 +71,20 @@ export class HeaderComponent implements OnInit {
   get canSeeReceipts()    { return this.isAdmin || this.isProcurement || this.isPharmacy; }
   get canSeeProcurement() { return this.canSeePOs || this.canSeeReceipts; }
 
-  get canSeeInventory()   { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isNursing || this.isCompliance; }
+  get canSeeStockPositions() { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isNursing || this.isCompliance; }
+  get canSeeExceptions()     { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isCompliance; }
+  get canSeeReplenishment()  { return this.isAdmin || this.isSupply || this.isPharmacy; }
+  get canSeeInventory()      { return this.canSeeItems || this.canSeeStockPositions || this.canSeeExceptions || this.canSeeReplenishment; }
 
-  get canSeeSensors()     { return this.isAdmin || this.isColdChain; }
+  get canSeeSensors()       { return this.isAdmin || this.isColdChain; }
   get canSeeTelemetryData() { return this.isAdmin || this.isColdChain || this.isCompliance; }
-  get canSeeColdChain()   { return this.canSeeSensors || this.canSeeTelemetryData; }
+  get canSeeColdChain()     { return this.canSeeSensors || this.canSeeTelemetryData; }
 
   get canSeeTransfers()   { return this.isAdmin || this.isSupply || this.isBiomedical || this.isProcurement; }
   get canSeeConsumption() { return this.isAdmin || this.isSupply || this.isNursing || this.isPharmacy; }
   get canSeeDistrib()     { return this.canSeeTransfers || this.canSeeConsumption; }
+
+  get canSeeAudit()       { return this.isAdmin || this.isCompliance; }
 
   get roleDisplayName(): string { return this.currentUser ? getRoleDisplayName(this.currentUser.role) : ''; }
   get dashboardRoute(): string  { return this.isAdmin ? '/admin/dashboard' : '/dashboard'; }

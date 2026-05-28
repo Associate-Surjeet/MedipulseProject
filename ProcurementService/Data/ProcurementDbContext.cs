@@ -65,7 +65,6 @@ public class ProcurementDbContext : DbContext
             entity.Property(e => e.ReceivedBy).IsRequired().HasMaxLength(100);
             entity.Property(e => e.QualityStatus).IsRequired().HasMaxLength(50).HasDefaultValue("Accepted");
             entity.Property(e => e.QuantityReceived).IsRequired();
-            entity.Property(e => e.Remarks).HasMaxLength(500);
 
             // PurchaseOrder -> Receipts: Cascade delete
             entity.HasOne(r => r.PurchaseOrder)

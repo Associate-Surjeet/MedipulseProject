@@ -1,0 +1,142 @@
+<div class="mp-page">
+  <div class="mp-hero">
+    <div>
+      <div class="mp-crumb">Dashboard / Distribution / <b>Consumption</b></div>
+      <h1 class="mp-h1">Consumption Records</h1>
+      <p class="mp-sub">Track medical supply usage across wards and facilities.</p>
+    </div>
+    <button class="mp-btn" (click)="openAdd()"><i class="bi bi-plus-lg"></i>Add record</button>
+  </div>
+
+  <div class="mp-content">
+    @if (successMessage) {
+      <div class="mp-toast mp-toast-success"><i class="bi bi-check-circle-fill"></i>{{ successMessage }}</div>
+    }
+    @if (errorMessage && !showModal) {
+      <div class="mp-toast mp-toast-danger"><i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}</div>
+    }
+
+    <!-- KPIs -->
+    <div class="mp-kpis">
+      <div class="mp-kpi"><div class="mp-kpi-label">Total Records</div><div class="mp-kpi-value">{{ records.length }}</div><div class="mp-kpi-foot">All consumption</div></div>
+      <div class="mp-kpi"><div class="mp-kpi-label">Total Qty</div><div class="mp-kpi-value">{{ totalQty }}</div><div class="mp-kpi-foot">Units consumed</div></div>
+      <div class="mp-kpi"><div class="mp-kpi-label">Unique Items</div><div class="mp-kpi-value">{{ uniqueItems }}</div><div class="mp-kpi-foot">Distinct items</div></div>
+      <div class="mp-kpi"><div class="mp-kpi-label">Facilities</div><div class="mp-kpi-value">{{ uniqueFacilities }}</div><div class="mp-kpi-foot">Reporting</div></div>
+    </div>
+
+    <div class="mp-card">
+      <div class="mp-card-header">
+        <div><div class="mp-eyebrow">Records</div><div class="mp-card-title">All consumption <span class="mp-tag mp-tag-gray ms-2" style="font-size:11px;vertical-align:middle">{{ filtered.length }}</span></div></div>
+        <div class="mp-card-actions">
+          <input type="text" class="search-box" style="width:240px" placeholder="Search items / staff…" [(ngModel)]="search" (input)="applyFilter()" />
+        </div>
+      </div>
+      <div class="mp-card-body">
+        @if (isLoading) {
+          <div class="empty-state"><div class="spinner-border" role="status"></div></div>
+        } @else if (filtered.length === 0) {
+          <div class="empty-state"><i class="bi bi-bag-check"></i><p class="fw-semibold mb-1">No consumption records</p><p class="small">Add the first record to start tracking usage.</p></div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr>
+                <th>Item</th><th>Facility</th><th>Ward</th><th class="text-end">Qty</th><th>Consumed Date</th><th>Consumed By</th><th class="text-center" style="width:100px">Actions</th>
+              </tr></thead>
+              <tbody>
+                @for (r of filtered; track r.consumptionId) {
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">{{ r.itemName }}</div>
+                      <div class="text-muted" style="font-size:11px">ID: {{ r.itemId }}</div>
+                    </td>
+                    <td class="text-muted">{{ r.facilityId }}</td>
+                    <td class="text-muted">{{ r.wardId ?? '—' }}</td>
+                    <td class="text-end fw-semibold">{{ r.quantityConsumed }}</td>
+                    <td class="text-muted" style="font-size:12px">{{ r.consumedDate | date:'dd MMM yyyy' }}</td>
+                    <td class="text-muted">{{ r.consumedBy }}</td>
+                    <td class="text-center">
+                      <div class="d-flex justify-content-center gap-1">
+                        <button class="btn btn-sm btn-outline-warning" (click)="openEdit(r)"><i class="bi bi-pencil-fill"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(r)"><i class="bi bi-trash-fill"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+@if (showModal) {
+  <div class="modal d-block" style="background:rgba(20,32,44,0.55)" (click)="closeModal()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header" [class]="editId ? 'gradient-header-edit' : 'gradient-header'">
+          <h5 class="modal-title"><i class="bi bi-bag-check me-2"></i>{{ editId ? 'Edit record' : 'Add consumption record' }}</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (errorMessage) { <div class="mp-toast mp-toast-danger mb-3">{{ errorMessage }}</div> }
+          <form [formGroup]="form">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Facility *</label>
+                <select class="form-select" formControlName="facilityId">
+                  <option value="">— Select facility —</option>
+                  @for (f of facilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
+                </select>
+              </div>
+              <div class="col-md-6"><label class="form-label">Ward ID</label><input type="number" class="form-control" formControlName="wardId" placeholder="Optional" /></div>
+              <div class="col-md-12">
+                <label class="form-label">Item *</label>
+                <select class="form-select" formControlName="itemId">
+                  <option value="">— Select item —</option>
+                  @for (item of items; track item.itemId) { <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option> }
+                </select>
+              </div>
+              <div class="col-md-4"><label class="form-label">Quantity *</label><input type="number" class="form-control" formControlName="quantityConsumed" min="1" /></div>
+              <div class="col-md-4"><label class="form-label">Consumed Date *</label><input type="date" class="form-control" formControlName="consumedDate" /></div>
+              <div class="col-md-4"><label class="form-label">Consumed By *</label><input class="form-control" formControlName="consumedBy" /></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-primary px-4" (click)="save()" [disabled]="isSaving">
+            @if (isSaving) { <span class="spinner-border spinner-border-sm me-2"></span>Saving… }
+            @else { <i class="bi bi-save me-2"></i>Save }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirm -->
+@if (showDeleteConfirm) {
+  <div class="modal d-block" style="background:rgba(20,32,44,0.55)" (click)="cancelDelete()">
+    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center" style="padding:2rem">
+          <div style="width:52px;height:52px;border-radius:50%;background:#FBF0EE;border:1px solid #EEC0BA;display:inline-flex;align-items:center;justify-content:center;font-size:1.4rem;color:#C44536;margin-bottom:14px">
+            <i class="bi bi-trash-fill"></i>
+          </div>
+          <h5 style="font-family:'Fraunces',serif;font-weight:500;color:#14202C;margin-bottom:8px">Delete record?</h5>
+          <p style="font-size:13px;color:#6B6A66">Remove consumption of <strong>{{ deleteTarget?.itemName }}</strong>. Cannot be undone.</p>
+        </div>
+        <div class="modal-footer justify-content-center gap-2">
+          <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn-danger px-4" (click)="doDelete()" [disabled]="isDeleting">
+            @if (isDeleting) { <span class="spinner-border spinner-border-sm me-2"></span>Deleting… }
+            @else { <i class="bi bi-trash-fill me-2"></i>Delete }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

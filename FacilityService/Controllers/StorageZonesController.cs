@@ -8,8 +8,9 @@ namespace FacilityService.Controllers;
 
 [ApiController]
 [Route("api/storagezones")]
-// Matches the monolith: Admin, SupplyManager, ColdChainOperator, ComplianceOfficer
-[RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ColdChainOperator, Roles.ComplianceOfficer)]
+// GET endpoints include Nurse (needs zone list for stock-position dropdowns).
+// Write operations are restricted at the method level — Nurse excluded.
+[RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ColdChainOperator, Roles.ComplianceOfficer, Roles.Nurse)]
 public class StorageZonesController : ControllerBase
 {
     private readonly IFacilityService _service;
@@ -33,8 +34,9 @@ public class StorageZonesController : ControllerBase
         return Ok(zone);
     }
 
-    // POST /api/storagezones
+    // POST /api/storagezones  — Nurse cannot create zones
     [HttpPost]
+    [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ColdChainOperator, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Create([FromBody] CreateStorageZoneRequest request)
     {
         try
@@ -48,8 +50,9 @@ public class StorageZonesController : ControllerBase
         }
     }
 
-    // PUT /api/storagezones/{id}
+    // PUT /api/storagezones/{id}  — Nurse cannot edit zones
     [HttpPut("{id:int}")]
+    [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ColdChainOperator, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateStorageZoneRequest request)
     {
         var updated = await _service.UpdateZoneAsync(id, request);
@@ -57,8 +60,9 @@ public class StorageZonesController : ControllerBase
         return Ok(updated);
     }
 
-    // DELETE /api/storagezones/{id}
+    // DELETE /api/storagezones/{id}  — Nurse cannot delete zones
     [HttpDelete("{id:int}")]
+    [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ColdChainOperator, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _service.DeleteZoneAsync(id);

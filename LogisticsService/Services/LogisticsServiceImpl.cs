@@ -1,0 +1,255 @@
+using LogisticsService.Data;
+using LogisticsService.DTOs;
+using LogisticsService.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace LogisticsService.Services;
+
+public class LogisticsServiceImpl : ILogisticsService
+{
+    private readonly LogisticsDbContext _db;
+
+    public LogisticsServiceImpl(LogisticsDbContext db) => _db = db;
+
+    // ── Transfer Orders ───────────────────────────────────────────────────
+
+    public async Task<IEnumerable<TransferOrderDto>> GetAllTransferOrdersAsync()
+        => await _db.TransferOrders
+            .OrderByDescending(t => t.TransferOrderId)
+            .Include(t => t.Items)
+            .Select(t => ToTransferOrderDto(t))
+            .ToListAsync();
+
+    public async Task<IEnumerable<TransferOrderDto>> GetTransferOrdersByFacilityAsync(int facilityId)
+        => await _db.TransferOrders
+            .Where(t => t.FromFacilityId == facilityId || t.ToFacilityId == facilityId)
+            .OrderByDescending(t => t.TransferOrderId)
+            .Include(t => t.Items)
+            .Select(t => ToTransferOrderDto(t))
+            .ToListAsync();
+
+    public async Task<TransferOrderDto?> GetTransferOrderByIdAsync(int id)
+    {
+        var t = await _db.TransferOrders
+            .Include(t => t.Items)
+            .FirstOrDefaultAsync(t => t.TransferOrderId == id);
+        return t == null ? null : ToTransferOrderDto(t);
+    }
+
+    public async Task<TransferOrderDto> CreateTransferOrderAsync(CreateTransferOrderRequest request)
+    {
+        if (request.FromFacilityId == request.ToFacilityId)
+            throw new InvalidOperationException(
+                "Source and destination facility cannot be the same.");
+
+        var order = new TransferOrder
+        {
+            FromFacilityId   = request.FromFacilityId,
+            FromFacilityName = request.FromFacilityName,
+            ToFacilityId     = request.ToFacilityId,
+            ToFacilityName   = request.ToFacilityName,
+            RequestedBy      = request.RequestedBy,
+            RequestedDate    = DateTime.UtcNow,
+            Status           = "Draft",
+            Items            = request.Items.Select(i => new TransferOrderItem
+            {
+                ItemId   = i.ItemId,
+                ItemName = i.ItemName,
+                Quantity = i.Quantity
+            }).ToList()
+        };
+
+        _db.TransferOrders.Add(order);
+        await _db.SaveChangesAsync();
+        return ToTransferOrderDto(order);
+    }
+
+    public async Task<TransferOrderDto?> UpdateTransferOrderAsync(int id, UpdateTransferOrderRequest request)
+    {
+        var order = await _db.TransferOrders
+            .Include(t => t.Items)
+            .FirstOrDefaultAsync(t => t.TransferOrderId == id);
+
+        if (order == null) return null;
+
+        if (order.Status != "Draft")
+            throw new InvalidOperationException(
+                $"Transfer order {id} cannot be edited in '{order.Status}' status. Only Draft orders can be modified.");
+
+        _db.TransferOrderItems.RemoveRange(order.Items);
+
+        order.Items = request.Items.Select(i => new TransferOrderItem
+        {
+            TransferOrderId = id,
+            ItemId          = i.ItemId,
+            ItemName        = i.ItemName,
+            Quantity        = i.Quantity
+        }).ToList();
+
+        await _db.SaveChangesAsync();
+        return ToTransferOrderDto(order);
+    }
+
+    public async Task<TransferOrderDto?> UpdateTransferStatusAsync(int id, UpdateTransferStatusRequest request)
+    {
+        var order = await _db.TransferOrders
+            .Include(t => t.Items)
+            .FirstOrDefaultAsync(t => t.TransferOrderId == id);
+
+        if (order == null) return null;
+
+        if (!IsValidStatusTransition(order.Status, request.Status))
+            throw new InvalidOperationException(
+                $"Cannot transition from '{order.Status}' to '{request.Status}'. " +
+                "Allowed next statuses: " + string.Join(", ", GetAllowedNextStatuses(order.Status)));
+
+        order.Status = request.Status;
+        await _db.SaveChangesAsync();
+        return ToTransferOrderDto(order);
+    }
+
+    public async Task<bool> DeleteTransferOrderAsync(int id)
+    {
+        var order = await _db.TransferOrders
+            .Include(t => t.Items)
+            .FirstOrDefaultAsync(t => t.TransferOrderId == id);
+
+        if (order == null) return false;
+
+        if (order.Status != "Draft" && order.Status != "Cancelled")
+            throw new InvalidOperationException(
+                $"Transfer order {id} cannot be deleted in '{order.Status}' status. " +
+                "Only Draft or Cancelled orders can be deleted.");
+
+        _db.TransferOrderItems.RemoveRange(order.Items);
+        _db.TransferOrders.Remove(order);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    // ── Consumption Records ───────────────────────────────────────────────
+
+    public async Task<IEnumerable<ConsumptionRecordDto>> GetAllConsumptionAsync()
+        => await _db.ConsumptionRecords
+            .OrderByDescending(c => c.ConsumptionId)
+            .Select(c => ToConsumptionDto(c))
+            .ToListAsync();
+
+    public async Task<IEnumerable<ConsumptionRecordDto>> GetConsumptionByFacilityAsync(int facilityId)
+        => await _db.ConsumptionRecords
+            .Where(c => c.FacilityId == facilityId)
+            .OrderByDescending(c => c.ConsumptionId)
+            .Select(c => ToConsumptionDto(c))
+            .ToListAsync();
+
+    public async Task<IEnumerable<ConsumptionRecordDto>> GetConsumptionByItemAsync(int itemId)
+        => await _db.ConsumptionRecords
+            .Where(c => c.ItemId == itemId)
+            .OrderByDescending(c => c.ConsumptionId)
+            .Select(c => ToConsumptionDto(c))
+            .ToListAsync();
+
+    public async Task<ConsumptionRecordDto?> GetConsumptionByIdAsync(int id)
+    {
+        var c = await _db.ConsumptionRecords.FindAsync(id);
+        return c == null ? null : ToConsumptionDto(c);
+    }
+
+    public async Task<ConsumptionRecordDto> CreateConsumptionAsync(CreateConsumptionRequest request)
+    {
+        var record = new ConsumptionRecord
+        {
+            FacilityId       = request.FacilityId,
+            WardId           = request.WardId,
+            ItemId           = request.ItemId,
+            ItemName         = request.ItemName,
+            QuantityConsumed = request.QuantityConsumed,
+            ConsumedDate     = request.ConsumedDate,
+            ConsumedBy       = request.ConsumedBy
+        };
+
+        _db.ConsumptionRecords.Add(record);
+        await _db.SaveChangesAsync();
+        return ToConsumptionDto(record);
+    }
+
+    public async Task<ConsumptionRecordDto?> UpdateConsumptionAsync(int id, UpdateConsumptionRequest request)
+    {
+        var record = await _db.ConsumptionRecords.FindAsync(id);
+        if (record == null) return null;
+
+        record.QuantityConsumed = request.QuantityConsumed;
+        record.ConsumedDate     = request.ConsumedDate;
+        record.ConsumedBy       = request.ConsumedBy;
+
+        await _db.SaveChangesAsync();
+        return ToConsumptionDto(record);
+    }
+
+    public async Task<bool> DeleteConsumptionAsync(int id)
+    {
+        var record = await _db.ConsumptionRecords.FindAsync(id);
+        if (record == null) return false;
+
+        _db.ConsumptionRecords.Remove(record);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────
+
+    private static TransferOrderDto ToTransferOrderDto(TransferOrder t) => new()
+    {
+        TransferOrderId  = t.TransferOrderId,
+        FromFacilityId   = t.FromFacilityId,
+        FromFacilityName = t.FromFacilityName,
+        ToFacilityId     = t.ToFacilityId,
+        ToFacilityName   = t.ToFacilityName,
+        RequestedBy      = t.RequestedBy,
+        RequestedDate    = t.RequestedDate,
+        Status           = t.Status,
+        Items            = t.Items.Select(i => new TransferOrderItemDto
+        {
+            TransferOrderItemId = i.TransferOrderItemId,
+            ItemId              = i.ItemId,
+            ItemName            = i.ItemName,
+            Quantity            = i.Quantity
+        }).ToList()
+    };
+
+    private static ConsumptionRecordDto ToConsumptionDto(ConsumptionRecord c) => new()
+    {
+        ConsumptionId    = c.ConsumptionId,
+        FacilityId       = c.FacilityId,
+        WardId           = c.WardId,
+        ItemId           = c.ItemId,
+        ItemName         = c.ItemName,
+        QuantityConsumed = c.QuantityConsumed,
+        ConsumedDate     = c.ConsumedDate,
+        ConsumedBy       = c.ConsumedBy
+    };
+
+    private static bool IsValidStatusTransition(string current, string next)
+    {
+        if (next == "Cancelled") return current != "Completed";
+        return (current, next) switch
+        {
+            ("Draft",     "Submitted") => true,
+            ("Submitted", "Approved")  => true,
+            ("Submitted", "Draft")     => true,
+            ("Approved",  "InTransit") => true,
+            ("InTransit", "Completed") => true,
+            _ => false
+        };
+    }
+
+    private static IEnumerable<string> GetAllowedNextStatuses(string current) =>
+        current switch
+        {
+            "Draft"     => ["Submitted", "Cancelled"],
+            "Submitted" => ["Approved", "Draft", "Cancelled"],
+            "Approved"  => ["InTransit", "Cancelled"],
+            "InTransit" => ["Completed", "Cancelled"],
+            _           => []
+        };
+}

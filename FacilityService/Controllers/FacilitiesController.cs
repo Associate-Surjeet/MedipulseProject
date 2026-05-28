@@ -8,11 +8,11 @@ namespace FacilityService.Controllers;
 
 [ApiController]
 [Route("api/facilities")]
-// All clinical roles can manage facilities — matches the monolith's [Authorize] roles.
-// Nurse is the only role excluded (view-only, no facility management needed).
+// GET endpoints are open to all roles (Nurse needs facilities list for dropdowns).
+// Write operations (POST/PUT/DELETE) are restricted at the method level — Nurse excluded.
 [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.PharmacyManager,
                Roles.ProcurementOfficer, Roles.ColdChainOperator,
-               Roles.DeviceManager, Roles.ComplianceOfficer)]
+               Roles.DeviceManager, Roles.ComplianceOfficer, Roles.Nurse)]
 public class FacilitiesController : ControllerBase
 {
     private readonly IFacilityService _service;
@@ -44,16 +44,22 @@ public class FacilitiesController : ControllerBase
         return Ok(zones);
     }
 
-    // POST /api/facilities
+    // POST /api/facilities  — Nurse cannot create facilities
     [HttpPost]
+    [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.PharmacyManager,
+                   Roles.ProcurementOfficer, Roles.ColdChainOperator,
+                   Roles.DeviceManager, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Create([FromBody] CreateFacilityRequest request)
     {
         var created = await _service.CreateFacilityAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = created.FacilityId }, created);
     }
 
-    // PUT /api/facilities/{id}
+    // PUT /api/facilities/{id}  — Nurse cannot edit facilities
     [HttpPut("{id:int}")]
+    [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.PharmacyManager,
+                   Roles.ProcurementOfficer, Roles.ColdChainOperator,
+                   Roles.DeviceManager, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateFacilityRequest request)
     {
         var updated = await _service.UpdateFacilityAsync(id, request);
@@ -61,9 +67,11 @@ public class FacilitiesController : ControllerBase
         return Ok(updated);
     }
 
-    // DELETE /api/facilities/{id}
-    // Cascades: deletes all StorageZones of this facility first, then the facility.
+    // DELETE /api/facilities/{id}  — Nurse cannot delete facilities
     [HttpDelete("{id:int}")]
+    [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.PharmacyManager,
+                   Roles.ProcurementOfficer, Roles.ColdChainOperator,
+                   Roles.DeviceManager, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _service.DeleteFacilityAsync(id);

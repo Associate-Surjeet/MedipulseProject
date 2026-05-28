@@ -52,9 +52,12 @@ public class UsersController : ControllerBase
     [RoleAuthorize(Roles.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
-        // Cannot delete your own account — same protection as the monolith
-        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        if (id == currentUserId)
+        // Cannot delete your own account.
+        // Try both mapped (ClaimTypes.NameIdentifier) and unmapped ("sub") claim names
+        // to handle differences across .NET JWT handler versions.
+        var rawId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                 ?? User.FindFirst("sub")?.Value;
+        if (int.TryParse(rawId, out var currentUserId) && id == currentUserId)
             return BadRequest(new { message = "You cannot delete your own account." });
 
         var result = await _authService.DeleteUserAsync(id);
