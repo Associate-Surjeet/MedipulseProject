@@ -122,7 +122,7 @@
               <label class="form-label">Supplier *</label>
               <select class="form-select" formControlName="supplierId">
                 <option [value]="null">— Select supplier —</option>
-                @for (s of suppliers; track s.supplierId) { <option [value]="s.supplierId">{{ s.name }}</option> }
+                @for (s of activeSuppliers; track s.supplierId) { <option [value]="s.supplierId">{{ s.name }}</option> }
               </select>
               @if (form.get('supplierId')?.touched && form.get('supplierId')?.hasError('required')) {
                 <div class="text-danger small mt-1">Supplier is required.</div>
@@ -135,7 +135,10 @@
               </div>
               <div class="col-6">
                 <label class="form-label">Expected delivery <span style="color:#9A9892;font-weight:400">(optional)</span></label>
-                <input class="form-control" type="date" formControlName="expectedDeliveryDate" />
+                <input class="form-control" type="date" formControlName="expectedDeliveryDate" [min]="minDeliveryDate" />
+                @if (form.hasError('deliveryNotAfterOrder') && form.get('expectedDeliveryDate')?.value) {
+                  <div class="text-danger small mt-1">Expected delivery date must be after order date.</div>
+                }
               </div>
             </div>
             <div class="mb-3">

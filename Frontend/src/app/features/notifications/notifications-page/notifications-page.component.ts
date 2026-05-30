@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../../services/notification/notification.service';
@@ -25,24 +25,27 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
 
   private pollInterval: any;
 
-  constructor(private svc: NotificationService) {}
+  constructor(private svc: NotificationService, private ngZone: NgZone) {}
 
   ngOnInit() {
     this.load();
-    // Refresh every 15 s so new notifications appear while on this page
-    this.pollInterval = setInterval(() => this.load(), 15_000);
+    // Run interval outside Angular zone — prevents change detection on every tick.
+    // ngZone.run() is called only inside the HTTP callback when data actually arrives.
+    this.ngZone.runOutsideAngular(() => {
+      this.pollInterval = setInterval(() => this.load(), 30_000);
+    });
   }
 
   ngOnDestroy() { clearInterval(this.pollInterval); }
 
   load() {
-    this.isLoading = true;
+    this.ngZone.run(() => { this.isLoading = true; });
     const params: any = {};
     if (this.categoryFilter) params.category = this.categoryFilter;
     if (this.isReadFilter !== '') params.isRead = this.isReadFilter === 'true';
     this.svc.getNotifications(params).subscribe({
-      next: (d) => { this.notifications = d; this.isLoading = false; },
-      error: () => { this.errorMessage = 'Failed to load notifications.'; this.isLoading = false; },
+      next: (d) => this.ngZone.run(() => { this.notifications = d; this.isLoading = false; }),
+      error: () => this.ngZone.run(() => { this.errorMessage = 'Failed to load notifications.'; this.isLoading = false; }),
     });
   }
 

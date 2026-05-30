@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProcurementService } from '../../../services/procurement/procurement.service';
 import { PurchaseOrderDto, SupplierDto } from '../../../services/procurement/procurement.models';
@@ -36,7 +36,7 @@ export class PurchaseOrdersComponent implements OnInit {
       orderDate:            [this.today(), Validators.required],
       expectedDeliveryDate: [''],
       notes:                [''],
-    });
+    }, { validators: this.deliveryAfterOrderValidator });
     this.statusForm = this.fb.group({ status: ['', Validators.required] });
   }
 
@@ -99,6 +99,27 @@ export class PurchaseOrdersComponent implements OnInit {
       next: () => { this.isDeleting = false; this.cancelDelete(); this.showSuccess('PO deleted.'); this.loadAll(); },
       error: (e: HttpErrorResponse) => { this.isDeleting = false; this.errorMessage = e.error?.message ?? 'Delete failed.'; this.cancelDelete(); },
     });
+  }
+
+  // Only show Active suppliers in the create/edit dropdown
+  get activeSuppliers(): SupplierDto[] { return this.suppliers.filter(s => s.status === 'Active'); }
+
+  // Minimum selectable delivery date = day after order date
+  get minDeliveryDate(): string {
+    const orderDate = this.form.get('orderDate')?.value as string;
+    if (!orderDate) return '';
+    const d = new Date(orderDate);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  }
+
+  // Cross-field validator: expectedDeliveryDate must be strictly after orderDate
+  private deliveryAfterOrderValidator(group: AbstractControl) {
+    const order    = group.get('orderDate')?.value as string;
+    const delivery = group.get('expectedDeliveryDate')?.value as string;
+    if (order && delivery && delivery <= order)
+      return { deliveryNotAfterOrder: true };
+    return null;
   }
 
   statusBadge(s: string) {

@@ -20,6 +20,10 @@ builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
 
+// Auto-create / migrate database on startup
+using (var scope = app.Services.CreateScope())
+    scope.ServiceProvider.GetRequiredService<AuthDbContext>().Database.Migrate();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

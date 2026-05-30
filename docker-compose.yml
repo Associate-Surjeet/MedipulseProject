@@ -1,0 +1,198 @@
+services:
+
+  # ── Database ────────────────────────────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=MediPulse@2024!Dev
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'MediPulse@2024!Dev' -Q 'SELECT 1' -b -No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - medipulse
+
+  # ── Backend services ─────────────────────────────────────────────────────────
+  authservice:
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - ServiceName=AuthService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  facilityservice:
+    build:
+      context: .
+      dockerfile: FacilityService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - ServiceName=FacilityService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  inventoryservice:
+    build:
+      context: .
+      dockerfile: InventoryService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - NotificationService__BaseUrl=http://notificationservice:8080
+      - ServiceName=InventoryService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  procurementservice:
+    build:
+      context: .
+      dockerfile: ProcurementService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - NotificationService__BaseUrl=http://notificationservice:8080
+      - ServiceName=ProcurementService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  logisticsservice:
+    build:
+      context: .
+      dockerfile: LogisticsService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - NotificationService__BaseUrl=http://notificationservice:8080
+      - ServiceName=LogisticsService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  telemetryservice:
+    build:
+      context: .
+      dockerfile: TelemetryService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - ServiceName=TelemetryService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  notificationservice:
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - AuditService__BaseUrl=http://auditservice:8080
+      - ServiceName=NotificationService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  auditservice:
+    build:
+      context: .
+      dockerfile: AuditService/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
+      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
+      - Jwt__Issuer=MediPulse
+      - Jwt__Audience=MediPulseUsers
+      - ServiceName=AuditService
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - medipulse
+
+  # ── Gateway ──────────────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Gateway/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - authservice
+      - facilityservice
+      - inventoryservice
+      - procurementservice
+      - logisticsservice
+      - telemetryservice
+      - notificationservice
+      - auditservice
+    networks:
+      - medipulse
+
+  # ── Frontend (Angular → nginx) ───────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway
+    networks:
+      - medipulse
+
+networks:
+  medipulse:
+    driver: bridge
+
+volumes:
+  sqlserver_data:

@@ -21,6 +21,10 @@ builder.Services.AddScoped<IAuditLogService, AuditLogServiceImpl>();
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
 
+// Auto-create / migrate database on startup
+using (var scope = app.Services.CreateScope())
+    scope.ServiceProvider.GetRequiredService<AuditDbContext>().Database.Migrate();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

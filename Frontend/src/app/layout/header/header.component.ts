@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
@@ -24,6 +24,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private notificationSvc: NotificationService,
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit(): void {
@@ -31,8 +32,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.currentUser = user;
       if (user) {
         this.loadUnreadCount();
-        // Poll every 15 seconds
-        this.pollInterval = setInterval(() => this.loadUnreadCount(), 15_000);
+        // Run interval outside Angular zone — prevents change detection on every tick.
+        // ngZone.run() is called only inside the HTTP callback when data actually arrives.
+        this.ngZone.runOutsideAngular(() => {
+          this.pollInterval = setInterval(() => this.loadUnreadCount(), 30_000);
+        });
       } else {
         clearInterval(this.pollInterval);
         this.unreadCount = 0;
