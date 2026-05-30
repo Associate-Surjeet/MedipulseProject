@@ -21,9 +21,16 @@ builder.Services.AddScoped<IAuditLogService, AuditLogServiceImpl>();
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
 
-// Auto-create / migrate database on startup
+// Auto-create / migrate database on startup (retry handles concurrent-start race on shared DB)
 using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<AuditDbContext>().Database.Migrate();
+{
+    var db = scope.ServiceProvider.GetRequiredService<AuditDbContext>();
+    for (var attempt = 0; attempt < 5; attempt++)
+    {
+        try { db.Database.Migrate(); break; }
+        catch when (attempt < 4) { Thread.Sleep(2000); }
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
