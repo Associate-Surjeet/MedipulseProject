@@ -35,8 +35,8 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.RegisterAsync(request);
-            return StatusCode(StatusCodes.Status201Created, result);
+            await _authService.RegisterAsync(request);
+            return StatusCode(StatusCodes.Status201Created, new { message = "Account created successfully. Please wait for admin approval." });
         }
         catch (InvalidOperationException ex)
         {

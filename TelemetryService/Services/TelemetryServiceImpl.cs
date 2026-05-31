@@ -25,7 +25,7 @@ public class TelemetryServiceImpl : ITelemetryService
         return s == null ? null : ToSensorDto(s);
     }
 
-    public async Task<SensorDeviceDto> CreateSensorAsync(CreateSensorDeviceRequest request)
+    public async Task<bool> CreateSensorAsync(CreateSensorDeviceRequest request)
     {
         var sensor = new SensorDevice
         {
@@ -36,13 +36,13 @@ public class TelemetryServiceImpl : ITelemetryService
         };
         _db.SensorDevices.Add(sensor);
         await _db.SaveChangesAsync();
-        return ToSensorDto(sensor);
+        return true;
     }
 
-    public async Task<SensorDeviceDto?> UpdateSensorAsync(int id, UpdateSensorDeviceRequest request)
+    public async Task<bool> UpdateSensorAsync(int id, UpdateSensorDeviceRequest request)
     {
         var sensor = await _db.SensorDevices.FindAsync(id);
-        if (sensor == null) return null;
+        if (sensor == null) return false;
 
         sensor.DeviceType       = request.DeviceType;
         sensor.AssignedTo       = request.AssignedTo;
@@ -50,7 +50,7 @@ public class TelemetryServiceImpl : ITelemetryService
         sensor.Status           = request.Status;
 
         await _db.SaveChangesAsync();
-        return ToSensorDto(sensor);
+        return true;
     }
 
     public async Task<bool> DeleteSensorAsync(int id)
@@ -100,7 +100,7 @@ public class TelemetryServiceImpl : ITelemetryService
             .Select(t => ToTelemetryDto(t))
             .ToListAsync();
 
-    public async Task<TelemetryRecordDto> CreateTelemetryAsync(CreateTelemetryRecordRequest request)
+    public async Task<bool> CreateTelemetryAsync(CreateTelemetryRecordRequest request)
     {
         var sensorExists = await _db.SensorDevices.AnyAsync(s => s.SensorId == request.SensorId);
         if (!sensorExists)
@@ -120,30 +120,24 @@ public class TelemetryServiceImpl : ITelemetryService
 
         _db.TelemetryRecords.Add(record);
         await _db.SaveChangesAsync();
-
-        await _db.Entry(record).Reference(r => r.SensorDevice).LoadAsync();
-        return ToTelemetryDto(record);
+        return true;
     }
 
-    public async Task<TelemetryRecordDto?> UpdateTelemetryAsync(int id, UpdateTelemetryRecordRequest request)
+    public async Task<bool> UpdateTelemetryAsync(int id, UpdateTelemetryRecordRequest request)
     {
-        var record = await _db.TelemetryRecords
-            .Include(t => t.SensorDevice)
-            .FirstOrDefaultAsync(t => t.TelemetryId == id);
-
-        if (record == null) return null;
+        var record = await _db.TelemetryRecords.FindAsync(id);
+        if (record == null) return false;
 
         record.Timestamp   = request.Timestamp;
         record.Temperature = request.Temperature;
         record.Humidity    = request.Humidity;
         record.Location    = request.Location;
 
-        // Re-run excursion detection whenever values change.
         record.IsExcursion = false;
         DetectExcursion(record);
 
         await _db.SaveChangesAsync();
-        return ToTelemetryDto(record);
+        return true;
     }
 
     public async Task<bool> DeleteTelemetryAsync(int id)

@@ -43,8 +43,8 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleRequest request)
     {
         var updated = await _authService.UpdateRoleAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"User {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"User {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/users/{id} — hard delete, matches monolith Admin.Delete logic

@@ -43,8 +43,8 @@ public class SuppliersController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.ProcurementOfficer)]
     public async Task<IActionResult> Create([FromBody] CreateSupplierRequest request)
     {
-        var created = await _service.CreateSupplierAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.SupplierId }, created);
+        await _service.CreateSupplierAsync(request);
+        return NoContent();
     }
 
     // PUT /api/suppliers/{id}
@@ -53,8 +53,8 @@ public class SuppliersController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierRequest request)
     {
         var updated = await _service.UpdateSupplierAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Supplier {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Supplier {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/suppliers/{id}

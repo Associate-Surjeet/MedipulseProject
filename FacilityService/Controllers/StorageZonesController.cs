@@ -41,8 +41,8 @@ public class StorageZonesController : ControllerBase
     {
         try
         {
-            var created = await _service.CreateZoneAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = created.ZoneId }, created);
+            await _service.CreateZoneAsync(request);
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -56,8 +56,8 @@ public class StorageZonesController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateStorageZoneRequest request)
     {
         var updated = await _service.UpdateZoneAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"StorageZone {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"StorageZone {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/storagezones/{id}  — Nurse cannot delete zones

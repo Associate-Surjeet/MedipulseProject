@@ -54,14 +54,12 @@ public class AuthServiceImpl : IAuthService
         return new AuthResponse
         {
             Token     = GenerateJwtToken(user, expiresAt),
-            Name      = user.Name,
-            Email     = user.Email,
             Role      = user.Role,
             ExpiresAt = expiresAt
         };
     }
 
-    public async Task<UserDto> RegisterAsync(RegisterRequest request)
+    public async Task<bool> RegisterAsync(RegisterRequest request)
     {
         if (await _db.Users.AnyAsync(u => u.Email.ToLower() == request.Email.ToLower()))
             throw new InvalidOperationException("A user with this email already exists.");
@@ -77,8 +75,7 @@ public class AuthServiceImpl : IAuthService
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
-
-        return MapToDto(user);
+        return true;
     }
 
     public async Task<List<UserDto>> GetAllUsersAsync()
@@ -95,14 +92,14 @@ public class AuthServiceImpl : IAuthService
         return user == null ? null : MapToDto(user);
     }
 
-    public async Task<UserDto?> UpdateRoleAsync(int id, UpdateRoleRequest request)
+    public async Task<bool> UpdateRoleAsync(int id, UpdateRoleRequest request)
     {
         var user = await _db.Users.FindAsync(id);
-        if (user == null) return null;
+        if (user == null) return false;
 
         user.Role = request.Role;
         await _db.SaveChangesAsync();
-        return MapToDto(user);
+        return true;
     }
 
     public async Task<bool> DeleteUserAsync(int id)

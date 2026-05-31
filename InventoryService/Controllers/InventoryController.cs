@@ -56,8 +56,8 @@ public class InventoryController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ProcurementOfficer)]
     public async Task<IActionResult> Create([FromBody] CreatePositionRequest request)
     {
-        var position = await _service.CreatePositionAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = position.PositionId }, position);
+        await _service.CreatePositionAsync(request);
+        return NoContent();
     }
 
     // PUT api/inventory/5
@@ -66,11 +66,11 @@ public class InventoryController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.Nurse)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdatePositionRequest request)
     {
-        var position = await _service.UpdatePositionAsync(id, request);
-        if (position is null)
+        var updated = await _service.UpdatePositionAsync(id, request);
+        if (!updated)
             return NotFound(new { message = $"Inventory position with ID {id} not found." });
 
-        return Ok(position);
+        return NoContent();
     }
 
     // DELETE api/inventory/5

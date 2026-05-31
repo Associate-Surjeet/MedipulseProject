@@ -5,10 +5,6 @@ namespace AuthService.DTOs;
 public class AuthResponse
 {
     public string Token { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
-
-    // Tells the frontend exactly when the token expires so it can auto-logout or refresh.
     public DateTime ExpiresAt { get; set; }
 }

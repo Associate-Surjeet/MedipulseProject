@@ -27,7 +27,7 @@ public class FacilityServiceImpl : IFacilityService
         return facility == null ? null : ToFacilityDto(facility);
     }
 
-    public async Task<FacilityDto> CreateFacilityAsync(CreateFacilityRequest request)
+    public async Task<bool> CreateFacilityAsync(CreateFacilityRequest request)
     {
         var facility = new Facility
         {
@@ -38,20 +38,20 @@ public class FacilityServiceImpl : IFacilityService
 
         _db.Facilities.Add(facility);
         await _db.SaveChangesAsync();
-        return ToFacilityDto(facility);
+        return true;
     }
 
-    public async Task<FacilityDto?> UpdateFacilityAsync(int id, UpdateFacilityRequest request)
+    public async Task<bool> UpdateFacilityAsync(int id, UpdateFacilityRequest request)
     {
         var facility = await _db.Facilities.FindAsync(id);
-        if (facility == null) return null;
+        if (facility == null) return false;
 
         facility.Name   = request.Name;
         facility.Type   = request.Type;
         facility.Region = request.Region;
 
         await _db.SaveChangesAsync();
-        return ToFacilityDto(facility);
+        return true;
     }
 
     public async Task<bool> DeleteFacilityAsync(int id)
@@ -101,10 +101,8 @@ public class FacilityServiceImpl : IFacilityService
         return zone == null ? null : ToZoneDto(zone);
     }
 
-    public async Task<StorageZoneDto> CreateZoneAsync(CreateStorageZoneRequest request)
+    public async Task<bool> CreateZoneAsync(CreateStorageZoneRequest request)
     {
-        // Validate that the referenced facility exists before attempting the insert.
-        // Without this check, SQL Server throws a FK constraint violation (DbUpdateException).
         var facilityExists = await _db.Facilities.AnyAsync(f => f.FacilityId == request.FacilityId);
         if (!facilityExists)
             throw new InvalidOperationException(
@@ -120,25 +118,20 @@ public class FacilityServiceImpl : IFacilityService
 
         _db.StorageZones.Add(zone);
         await _db.SaveChangesAsync();
-
-        await _db.Entry(zone).Reference(z => z.Facility).LoadAsync();
-        return ToZoneDto(zone);
+        return true;
     }
 
-    public async Task<StorageZoneDto?> UpdateZoneAsync(int id, UpdateStorageZoneRequest request)
+    public async Task<bool> UpdateZoneAsync(int id, UpdateStorageZoneRequest request)
     {
-        var zone = await _db.StorageZones
-            .Include(z => z.Facility)
-            .FirstOrDefaultAsync(z => z.ZoneId == id);
-
-        if (zone == null) return null;
+        var zone = await _db.StorageZones.FindAsync(id);
+        if (zone == null) return false;
 
         zone.Name               = request.Name;
         zone.TemperatureProfile = request.TemperatureProfile;
         zone.Capacity           = request.Capacity;
 
         await _db.SaveChangesAsync();
-        return ToZoneDto(zone);
+        return true;
     }
 
     public async Task<bool> DeleteZoneAsync(int id)

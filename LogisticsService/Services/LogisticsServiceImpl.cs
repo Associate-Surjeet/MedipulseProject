@@ -36,7 +36,7 @@ public class LogisticsServiceImpl : ILogisticsService
         return t == null ? null : ToTransferOrderDto(t);
     }
 
-    public async Task<TransferOrderDto> CreateTransferOrderAsync(CreateTransferOrderRequest request)
+    public async Task<bool> CreateTransferOrderAsync(CreateTransferOrderRequest request)
     {
         if (request.FromFacilityId == request.ToFacilityId)
             throw new InvalidOperationException(
@@ -61,16 +61,16 @@ public class LogisticsServiceImpl : ILogisticsService
 
         _db.TransferOrders.Add(order);
         await _db.SaveChangesAsync();
-        return ToTransferOrderDto(order);
+        return true;
     }
 
-    public async Task<TransferOrderDto?> UpdateTransferOrderAsync(int id, UpdateTransferOrderRequest request)
+    public async Task<bool> UpdateTransferOrderAsync(int id, UpdateTransferOrderRequest request)
     {
         var order = await _db.TransferOrders
             .Include(t => t.Items)
             .FirstOrDefaultAsync(t => t.TransferOrderId == id);
 
-        if (order == null) return null;
+        if (order == null) return false;
 
         if (order.Status != "Draft")
             throw new InvalidOperationException(
@@ -87,16 +87,13 @@ public class LogisticsServiceImpl : ILogisticsService
         }).ToList();
 
         await _db.SaveChangesAsync();
-        return ToTransferOrderDto(order);
+        return true;
     }
 
-    public async Task<TransferOrderDto?> UpdateTransferStatusAsync(int id, UpdateTransferStatusRequest request)
+    public async Task<bool> UpdateTransferStatusAsync(int id, UpdateTransferStatusRequest request)
     {
-        var order = await _db.TransferOrders
-            .Include(t => t.Items)
-            .FirstOrDefaultAsync(t => t.TransferOrderId == id);
-
-        if (order == null) return null;
+        var order = await _db.TransferOrders.FindAsync(id);
+        if (order == null) return false;
 
         if (!IsValidStatusTransition(order.Status, request.Status))
             throw new InvalidOperationException(
@@ -105,7 +102,7 @@ public class LogisticsServiceImpl : ILogisticsService
 
         order.Status = request.Status;
         await _db.SaveChangesAsync();
-        return ToTransferOrderDto(order);
+        return true;
     }
 
     public async Task<bool> DeleteTransferOrderAsync(int id)
@@ -155,7 +152,7 @@ public class LogisticsServiceImpl : ILogisticsService
         return c == null ? null : ToConsumptionDto(c);
     }
 
-    public async Task<ConsumptionRecordDto> CreateConsumptionAsync(CreateConsumptionRequest request)
+    public async Task<bool> CreateConsumptionAsync(CreateConsumptionRequest request)
     {
         var record = new ConsumptionRecord
         {
@@ -170,20 +167,20 @@ public class LogisticsServiceImpl : ILogisticsService
 
         _db.ConsumptionRecords.Add(record);
         await _db.SaveChangesAsync();
-        return ToConsumptionDto(record);
+        return true;
     }
 
-    public async Task<ConsumptionRecordDto?> UpdateConsumptionAsync(int id, UpdateConsumptionRequest request)
+    public async Task<bool> UpdateConsumptionAsync(int id, UpdateConsumptionRequest request)
     {
         var record = await _db.ConsumptionRecords.FindAsync(id);
-        if (record == null) return null;
+        if (record == null) return false;
 
         record.QuantityConsumed = request.QuantityConsumed;
         record.ConsumedDate     = request.ConsumedDate;
         record.ConsumedBy       = request.ConsumedBy;
 
         await _db.SaveChangesAsync();
-        return ToConsumptionDto(record);
+        return true;
     }
 
     public async Task<bool> DeleteConsumptionAsync(int id)
