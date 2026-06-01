@@ -35,6 +35,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -52,6 +54,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -70,6 +74,10 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
+      notificationservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -88,6 +96,10 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
+      notificationservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -106,6 +118,10 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
+      notificationservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -123,6 +139,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -140,6 +158,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      auditservice:
+        condition: service_started
     networks:
       - medipulse
 
@@ -190,9 +210,26 @@ services:
     networks:
       - medipulse
 
+  # ── SonarQube ────────────────────────────────────────────────────────────────
+  sonarqube:
+    image: sonarqube:community
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - medipulse
+
 networks:
   medipulse:
     driver: bridge
 
 volumes:
   sqlserver_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:

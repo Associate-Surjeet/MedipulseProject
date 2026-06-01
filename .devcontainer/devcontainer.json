@@ -4,11 +4,12 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-  "forwardPorts": [80, 5000, 1433],
+  "forwardPorts": [80, 5000, 1433, 9000],
   "portsAttributes": {
     "80":   { "label": "Frontend (Angular)", "onAutoForward": "openBrowser" },
     "5000": { "label": "API Gateway" },
-    "1433": { "label": "SQL Server" }
+    "1433": { "label": "SQL Server" },
+    "9000": { "label": "SonarQube" }
   },
   "postCreateCommand": "docker compose build",
   "remoteUser": "vscode"
